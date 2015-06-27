@@ -5,11 +5,18 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>NSHint</title>
+  <title>Tracking down drawing errors - NSHint</title>
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content=" Team Rafael Matt Wojtek Marcin Recent Posts Tracking down drawing errors Storyboard Localization Detailed Exceptions Toggle Slow Animations ">
+  <meta name="description" content="Do you sometimes see this in your code while performing custom drawing using drawRect? 1
+2
+3
+4
+5
+6
+7
+&lt;Error&gt;: CGContextSaveGState: invalid &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +25,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://nshint.io/team">
+  <link rel="canonical" href="http://nshint.io/blog/2015/06/27/tracking-drawing-errors">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="NSHint" type="application/atom+xml">
@@ -50,36 +57,69 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article role="article">
+      
+<div>
+<article class="hentry" role="article">
   
-  <h1 class="team-title">Team</h1>
-<div id="about">
-    <div class="team">
-        <div class="team-profile">
-        	<img src="/images/rafael.jpeg" class="team-profile-image"/>
-        	<p><a href="https://twitter.com/rakaramos">Rafael</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/mateusz.png" class="team-profile-image">
-        	<p><a href="https://twitter.com/mmatoszko">Matt</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/wojtek.jpeg" class="team-profile-image">
-        	<p><a href="https://twitter.com/wojteklukaszuk">Wojtek</a></p>
-        </div>
-        <div class="team-profile">
-            <img src="/images/marcin.png" class="team-profile-image">
-                <p><a href="https://twitter.com/noxytrux">Marcin</a></p>
-                </div>
-    </div>
-    <div id="social">
-        <a class="twitter" href="http://twitter.com/nshintio" title="Twitter"></a>
-        <a class="github" href="http://github.com/nshintio" title="Github"></a>
-        <a class="mail" href="mailto:nshintio@gmail.com" title="Mail"></a>
-    </div>
+  <header>
+  
+    
+      <h1 class="entry-title">Tracking Down Drawing Errors</h1>
+    
+  
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-27T11:35:32+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Do you sometimes see this in your code while performing custom drawing using <code>drawRect</code>?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;Error&gt;: CGContextSaveGState: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextSetBlendMode: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextSetAlpha: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextTranslateCTM: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextScaleCTM: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextDrawImage: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextRestoreGState: invalid context 0x0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And as always is very hard to track, because you cannot exactly say which draw command actually cause this or where does it comes from.
+But there is a simple solution to this:</p>
+
+<p>Use this symbolic breakpoint <code>CGPostError</code> in your xcode to stop executing on exact line where drawing error appears.</p>
+
+<p><img class="center" src="/images/track-drawin-errors/screen_cgposterror.png"></p>
+
+<p>Now you can see all callstack and all values to find root cause of incorrect drawing.</p>
 </div>
-  
+
+
+  <footer>
+    <em>by <a href="https://www.twitter.com/noxytrux" >Marcin Małysz</a>, 2015 Jun 27</em>
+  </footer>
 </article>
 
 </div>
