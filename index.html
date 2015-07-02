@@ -9,14 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Do you sometimes see this in your code while performing custom drawing using drawRect? 1
-2
-3
-4
-5
-6
-7
-&lt;Error&gt;: CGContextSaveGState: invalid &hellip;">
+  <meta name="description" content="CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000 This error may happen when you try to load UIImage and your asset &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -59,6 +52,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/">Fixing UICatalog Invalid Asset Error</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-02T17:29:00+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><code>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</code> This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+
+<p><img class="center" src="/images/uicatalog_invalid_asset/null_asset.png"></p>
+
+<p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -530,6 +565,10 @@ When this happens, we are usually presented with all the stack trace and in the 
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/">Fixing UICatalog invalid asset error</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/06/27/tracking-drawing-errors/">Tracking down drawing errors</a>

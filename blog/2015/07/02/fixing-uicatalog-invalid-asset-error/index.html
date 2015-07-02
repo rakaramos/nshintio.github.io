@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>NSHint</title>
+  <title>Fixing UICatalog invalid asset error - NSHint</title>
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Team Rafael Matt Wojtek Marcin Recent Posts Fixing UICatalog invalid asset error Tracking down drawing errors Storyboard Localization Detailed &hellip;">
+  <meta name="description" content="CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000 This error may happen when you try to load UIImage and your asset &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://nshint.io/team">
+  <link rel="canonical" href="http://nshint.io/blog/2015/07/02/fixing-uicatalog-invalid-asset-error">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="NSHint" type="application/atom+xml">
@@ -50,36 +50,48 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article role="article">
+      
+<div>
+<article class="hentry" role="article">
   
-  <h1 class="team-title">Team</h1>
-<div id="about">
-    <div class="team">
-        <div class="team-profile">
-        	<img src="/images/rafael.jpeg" class="team-profile-image"/>
-        	<p><a href="https://twitter.com/rakaramos">Rafael</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/mateusz.png" class="team-profile-image">
-        	<p><a href="https://twitter.com/mmatoszko">Matt</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/wojtek.jpeg" class="team-profile-image">
-        	<p><a href="https://twitter.com/wojteklukaszuk">Wojtek</a></p>
-        </div>
-        <div class="team-profile">
-            <img src="/images/marcin.png" class="team-profile-image">
-                <p><a href="https://twitter.com/noxytrux">Marcin</a></p>
-                </div>
-    </div>
-    <div id="social">
-        <a class="twitter" href="http://twitter.com/nshintio" title="Twitter"></a>
-        <a class="github" href="http://github.com/nshintio" title="Github"></a>
-        <a class="mail" href="mailto:nshintio@gmail.com" title="Mail"></a>
-    </div>
+  <header>
+  
+    
+      <h1 class="entry-title">Fixing UICatalog Invalid Asset Error</h1>
+    
+  
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-02T17:29:00+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><code>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</code> This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+
+<p><img class="center" src="/images/uicatalog_invalid_asset/null_asset.png"></p>
+
+<p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
 </div>
-  
+
+
+  <footer>
+    <em>by <a href="https://www.twitter.com/noxytrux" >Marcin Małysz</a>, 2015 Jul 2</em>
+  </footer>
 </article>
 
 </div>

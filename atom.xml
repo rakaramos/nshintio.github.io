@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-06-27T12:15:50+02:00</updated>
+  <updated>2015-07-03T00:03:56+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,23 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[Fixing UICatalog invalid asset error]]></title>
+    <link href="http://nshint.io/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/"/>
+    
+    <updated>2015-07-02T17:29:00+02:00</updated>
+    <id>http://nshint.io/blog/2015/07/02/fixing-uicatalog-invalid-asset-error</id>
+    
+    <content type="html"><![CDATA[<p><code>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</code> This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+
+<p><img class="center" src="http://nshint.io/images/uicatalog_invalid_asset/null_asset.png"></p>
+
+<p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
