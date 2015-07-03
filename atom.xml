@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-07-03T00:03:56+02:00</updated>
+  <updated>2015-07-03T15:59:13+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -21,7 +21,11 @@
     <updated>2015-07-02T17:29:00+02:00</updated>
     <id>http://nshint.io/blog/2015/07/02/fixing-uicatalog-invalid-asset-error</id>
     
-    <content type="html"><![CDATA[<p><code>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</code> This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+    <content type="html"><![CDATA[<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
 
 <p><img class="center" src="http://nshint.io/images/uicatalog_invalid_asset/null_asset.png"></p>
 

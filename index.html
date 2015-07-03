@@ -9,7 +9,8 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000 This error may happen when you try to load UIImage and your asset &hellip;">
+  <meta name="description" content="1
+CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000 This error may happen when you try to load UIImage and your &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,7 +84,11 @@
   </header>
 
 
-  <div class="entry-content"><p><code>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</code> This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
 
 <p><img class="center" src="/images/uicatalog_invalid_asset/null_asset.png"></p>
 
