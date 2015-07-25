@@ -9,7 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Have you ever encountered a situation where you want to build some record or music app ? But you need to somehow react on a phone call which in many &hellip;">
+  <meta name="description" content="Bash scripts are commonly used in Mac/iOS development to make repetitive operations hands-free. However sometimes things go wrong and in a perfect &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -52,6 +52,335 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase Reporting</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-23T13:24:06+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Bash scripts are commonly used in Mac/iOS development to make repetitive operations hands-free. However sometimes things go wrong and in a perfect world I’d like to be properly informed about the errors.
+Here comes view called „Report Navigator”, which displays any type of errors, warnings at compile time of Objective-C/Swift, or even while typing new lines of code. Let me show how to use the Report Navigator.</p>
+
+<p>As usual create new <code>Run Script Phase</code> and insert your Bash script:</p>
+
+<p><img class="center" src="/images/bash-scripts-marks/bash-scripts-new-script-phase.png"></p>
+
+<p>To keep this blog post short, I&rsquo;ve created a simple script that checks which build configurations were used:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo</span> <span class="s2">&quot;note: Starting script phase.”</span>
+</span><span class='line'><span class="s2">echo &quot;</span>warning: testing <span class="k">for</span> Debug target<span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">if [ &quot;</span>Debug<span class="s2">&quot;= &quot;</span><span class="k">${</span><span class="nv">CONFIGURATION</span><span class="k">}</span><span class="s2">&quot; ];</span>
+</span><span class='line'><span class="s2">then</span>
+</span><span class='line'><span class="s2">    echo &quot;</span>error: please run this script on Release target<span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">else</span>
+</span><span class='line'><span class="s2">    echo &quot;</span>warning: running on Debug target<span class="err">&quot;</span>
+</span><span class='line'><span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please, take a look in every echo at <code>note:</code>, <code>warning:</code> and <code>error:</code> prefixes. When XCode recognizes any of these tags, the proper indicator will show up in Report Navigator and of course at the top bar:</p>
+
+<p><img class="center" src="/images/bash-scripts-marks/bash-scripts-error-navigator.png"></p>
+
+<p>Pay attention to the colon at the end of each tag. Tags can be placed anywhere in the message.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/16/uicollectionviews-now-have-easy-reordering/">UICollectionViews Now Have Easy Reordering</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-16T01:30:09+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;m a huge fan of <code>UICollectionView</code>. It&rsquo;s way more customizable than his older brother <code>UITableView</code>. Nowadays I use collection view even more often than table view. With iOS 9 it supports easy reordering. Before it wasn&rsquo;t possible out of the box, and to do so means painful work. Let&rsquo;s have look at the API. You can find the accompanying Xcode project <a href="https://github.com/nshintio/uicollectionview-reordering">on GitHub</a>.</p>
+
+<p>The easiest way to add easy reordering is to use <code>UICollectionViewController</code>. It now has a new property called <code>installsStandardGestureForInteractiveMovement</code> which adds standard gestures to reorder cells. This property is <code>true</code> by default, which means that there&rsquo;s only one method we should to override to get things working.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="kr">override</span> <span class="k">func</span> <span class="nf">collectionView</span><span class="p">(</span><span class="nl">collectionView</span><span class="p">:</span> <span class="bp">UICollectionView</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">moveItemAtIndexPath</span> <span class="nl">sourceIndexPath</span><span class="p">:</span> <span class="bp">NSIndexPath</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">toIndexPath</span> <span class="nl">destinationIndexPath</span><span class="p">:</span> <span class="bp">NSIndexPath</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// move your data order</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The collection view infers that items can be moved because <code>moveItemAtIndexPath</code> is overrired.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/1.gif"></p>
+
+<p>Things go complicated when we want to use a simple <code>UIViewController</code> with collection view. We also need to implement <code>UICollectionViewDataSource</code> methods mentioned above, but we need to rewrite <code>installsStandardGestureForInteractiveMovement</code>. No worries, it&rsquo;s also easily supported.<code>UILongPressGestureRecognizer</code> is a continuous gesture recognizer and fully supports panning.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="kr">override</span> <span class="k">func</span> <span class="nf">viewDidLoad</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nb">super</span><span class="p">.</span><span class="n">viewDidLoad</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">longPressGesture</span> <span class="o">=</span> <span class="bp">UILongPressGestureRecognizer</span><span class="p">(</span><span class="nl">target</span><span class="p">:</span> <span class="nb">self</span><span class="p">,</span> <span class="nl">action</span><span class="p">:</span> <span class="s">&quot;handleLongGesture:&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">.</span><span class="n">addGestureRecognizer</span><span class="p">(</span><span class="n">longPressGesture</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="nf">handleLongGesture</span><span class="p">(</span><span class="nl">gesture</span><span class="p">:</span> <span class="bp">UILongPressGestureRecognizer</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">switch</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Began</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">guard</span> <span class="k">let</span> <span class="n">selectedIndexPath</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">.</span><span class="n">indexPathForItemAtPoint</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">locationInView</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">))</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">break</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">beginInteractiveMovementForItemAtIndexPath</span><span class="p">(</span><span class="n">selectedIndexPath</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Changed</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">updateInteractiveMovementTargetPosition</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">locationInView</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">view</span><span class="o">!</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Ended</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">endInteractiveMovement</span><span class="p">()</span>
+</span><span class='line'>        <span class="k">default</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">cancelInteractiveMovement</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We stored selected index path obtained in long press gesture handler and depending on wether it has any value we allow to pan gesture to kick in. Then, we call some new collection view methods accordingly to the gesture state:</p>
+
+<ul>
+<li><code>beginInteractiveMovementForItemAtIndexPath(indexPath: NSIndexPath)</code> which starts interactive movement for cell at specific index path</li>
+<li><code>updateInteractiveMovementTargetPosition(targetPosition: CGPoint)</code> which updates interactive movement target position during gesture</li>
+<li><code>endInteractiveMovement()</code> which ends interactive movement after you finish pan gesture</li>
+<li><code>cancelInteractiveMovement()</code> which cancels interactive movement</li>
+</ul>
+
+
+<p>And this makes handling pan gesture obvious.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/2.gif"></p>
+
+<p>The behavior is the same as with standard <code>UICollectionViewController</code>. Really cool, but what makes it even cooler is that we can apply reordering to collection view with our custom collection view layout. Check interactive movement with simple waterfall layout.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/3.gif"></p>
+
+<p>Uhm, looks cool, but what if we don&rsquo;t want to change cell size during movement? Selected cell size during interactive movement should remain the same. This is possible. <code>UICollectionViewLayout</code> also gets additional methods to handle reordering.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">func</span> <span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="nl">targetIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="n">withTargetPosition</span> <span class="nl">targetPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">,</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">func</span> <span class="n">invalidationContextForEndingInteractiveMovementOfItemsToFinalIndexPaths</span><span class="p">(</span><span class="nl">indexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">movementCancelled</span><span class="p">:</span> <span class="n">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The former is called during the cells interactive movement with target and previous cell&rsquo;s indexPaths. The next one is similar, but it&rsquo;s called just after interactive movement ends. With this knowledge we can achieve our requirement using one little trick.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">internal</span> <span class="kr">override</span> <span class="k">func</span> <span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="nl">targetIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="n">withTargetPosition</span> <span class="nl">targetPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">,</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">var</span> <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">.</span><span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="n">targetIndexPaths</span><span class="p">,</span>
+</span><span class='line'>        <span class="nl">withTargetPosition</span><span class="p">:</span> <span class="n">targetPosition</span><span class="p">,</span> <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="n">previousIndexPaths</span><span class="p">,</span>
+</span><span class='line'>        <span class="nl">previousPosition</span><span class="p">:</span> <span class="n">previousPosition</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">self</span><span class="p">.</span><span class="n">delegate</span><span class="o">?</span><span class="p">.</span><span class="n">collectionView</span><span class="o">!</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="o">!</span><span class="p">,</span> <span class="nl">moveItemAtIndexPath</span><span class="p">:</span> <span class="n">previousIndexPaths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+</span><span class='line'>        <span class="nl">toIndexPath</span><span class="p">:</span> <span class="n">targetIndexPaths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">context</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Solution is straightforward. Grab previous and target index paths of currently moving cell. Then call <code>UICollectionViewDataSource</code> method to move this items around.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/4.gif"></p>
+
+<p>Without a doubt, a collection view reordering is a fantastic addition. UIKit engineers made awesome job! :)</p>
+
+<p>P.S: I would like to thanks <a href="https://twitter.com/qdoug">Douglas Hill</a> for hinting out some improvements in our code. Thanks Douglas, keep up the good work!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/12/shared-breakpoints/">Shared Breakpoints</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-12T19:00:40+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Developing multithreaded application is not something new and it&rsquo;s become more and more popular with multicore processors. One thing it&rsquo;s for sure, debugging multithread applications is tough.</p>
+
+<p>iOS has some gotchas regarding multithread, things that if you don&rsquo;t respect, may cause your application to crash or hang the users interface, for example:</p>
+
+<ul>
+<li>Animations outside the main thread, may crash the application.<br/></li>
+<li>Performing network requests on the main thread, will hang the users interface.<br/></li>
+</ul>
+
+
+<p><img class="left" src="/images/shared-breakpoints/1.png">
+We can solve those situations by using the so called <code>Symbolic Breakpoints</code> and <a href="https://developer.apple.com/library/ios/recipes/xcode_help-breakpoint_navigator/articles/sharing_a_breakpoint.html">share those breakpoints</a> with your team. Thereby, every developer can take advantage of that, and get notified, when they occur.</p>
+
+<p>To help you out, we created a bunch of shared breakpoints and integrate them into your project is very easy:</p>
+
+<p><img class="right" src="/images/shared-breakpoints/2.png">
+- Go to your <code>.xcodeproj</code> or <code>.xcworkspace</code> file, right click on it, and choose <code>Show Package Contents</code>.<br/>
+- Open the folder <code>xcshareddata</code>, then <code>xcdebugger</code> (create them if not exists).<br/>
+- Breakpoints are saved into <code>Breakpoints_v2.xcbkptlist</code>.<br/>
+-  Now you just have to paste the following content into the <code>&lt;Breakpoints&gt;</code> node.</p>
+
+<p>(We could also add those by using <a href="https://developer.apple.com/library/mac/documentation/IDEs/Conceptual/gdb_to_lldb_transition_guide/document/lldb-terminal-workflow-tutorial.html"><code>LLDB</code> commands</a>, but those won&rsquo;t show up on the Breakpoints navigator)</p>
+
+<p><img class="center" src="/images/shared-breakpoints/3.png"></p>
+
+<p>Our list of useful breakpoints <a href="https://gist.github.com/rakaramos/d2bc8e75ae68ac830a59">is available here</a></p>
+
+<p>Now, whenever the breakpoint conditions are satisfied, you&rsquo;ll be notified and will have a chance to quickly fix your code, before it crashes into the users hand!</p>
+
+<p><img class="center" src="/images/shared-breakpoints/4.png"></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -871,23 +1200,23 @@ When this happens, we are usually presented with all the stack trace and in the 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase reporting</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/16/uicollectionviews-now-have-easy-reordering/">UICollectionViews now have easy reordering</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/12/shared-breakpoints/">Shared breakpoints</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/05/working-with-coretelephony-framework/">Working with Core Telephony framework</a>
       </li>
     
       <li class="post">
         <a href="/blog/2015/07/04/how-to-animate-uilabel-properties/">How to animate UILabel properties</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/">Fixing UICatalog invalid asset error</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/27/tracking-drawing-errors/">Tracking down drawing errors</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/06/25/storyboard-localization/">Storyboard Localization</a>
       </li>
     
   </ul>
