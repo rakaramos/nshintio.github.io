@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-08-05T23:33:21+02:00</updated>
+  <updated>2015-08-06T08:54:01+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -56,11 +56,6 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
 </pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">myDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AppDelegate</span> <span class="p">{</span>
 </span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">delegate</span> <span class="kt">as</span><span class="o">!</span> <span class="n">AppDelegate</span><span class="p">)</span>
@@ -75,40 +70,37 @@
 </span><span class='line'>        <span class="bp">UIApplication</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="err">``</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">Now</span> <span class="n">the</span> <span class="k">class</span> <span class="n">would</span> <span class="n">just</span> <span class="n">call</span> <span class="err">`</span><span class="bp">UIApplication</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span><span class="err">`</span> <span class="n">or</span> <span class="err">`</span><span class="n">AppDelegate</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span><span class="err">`</span><span class="p">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">Another</span> <span class="n">situation</span> <span class="n">that</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">a</span> <span class="n">claimer</span> <span class="k">for</span> <span class="n">LoD</span> <span class="kt">is</span> <span class="n">when</span> <span class="n">you</span> <span class="n">have</span> <span class="n">chained</span> <span class="err">&#39;</span><span class="kr">get</span><span class="err">&#39;</span> <span class="n">statements</span><span class="p">,</span> <span class="k">for</span> <span class="nl">example</span><span class="p">:</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>swift
-let myDesire = Metallica().gimmeFuel().gimmeFire().gimmeThatWhichIDesire()
-``</p>
+<p>Now the class would just call <code>UIApplication.doSomething()</code> or <code>AppDelegate.doSomething()</code>.</p>
 
-<p>In such a case, the <code>Metallica</code> class should be refactored and provide it with a mean of calling <code>Metallica().gimmeThatWhichIDesire()</code>, for example:</p>
+<p>Another situation that&rsquo;s a claimer for LoD is when you have chained &lsquo;get&rsquo; statements, for example:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">class</span> <span class="n">Metallica</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">func</span> <span class="n">fuelSetOnFire</span><span class="p">(</span><span class="nl">fuel</span><span class="p">:</span> <span class="n">Fuel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fire</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">Fire</span><span class="p">.</span><span class="n">setFuelOnFire</span><span class="p">(</span><span class="n">fuel</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">myDesire</span> <span class="o">=</span> <span class="n">Metallica</span><span class="p">().</span><span class="n">gimmeFuel</span><span class="p">().</span><span class="n">gimmeFire</span><span class="p">().</span><span class="n">gimmeThatWhichIDesire</span><span class="p">()</span>
+</span><span class='line'><span class="err">``</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="k">func</span> <span class="n">gimmeThatWhichIDesire</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Desire</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">Desire</span><span class="p">.</span><span class="n">fromFire</span><span class="p">(</span><span class="n">fuelSetOnFire</span><span class="p">(</span><span class="n">metallicasFuel</span><span class="p">))</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="n">In</span> <span class="n">such</span> <span class="n">a</span> <span class="k">case</span><span class="p">,</span> <span class="n">the</span> <span class="err">`</span><span class="n">Metallica</span><span class="err">`</span> <span class="k">class</span> <span class="n">should</span> <span class="n">be</span> <span class="n">refactored</span> <span class="n">and</span> <span class="n">provide</span> <span class="n">it</span> <span class="n">with</span> <span class="n">a</span> <span class="n">mean</span> <span class="n">of</span> <span class="n">calling</span> <span class="err">`</span><span class="n">Metallica</span><span class="p">().</span><span class="n">gimmeThatWhichIDesire</span><span class="p">()</span><span class="err">`</span><span class="p">,</span> <span class="k">for</span> <span class="nl">example</span><span class="p">:</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p>swift
+class Metallica {
+    func fuelSetOnFire(fuel: Fuel) -> Fire {
+        return Fire.setFuelOnFire(fuel)
+    }</p>
+
+<pre><code>func gimmeThatWhichIDesire() -&gt; Desire {
+    return Desire.fromFire(fuelSetOnFire(metallicasFuel))
+}
+</code></pre>
+
+<p>}
+```</p>
 
 <p>Wrapping up method calls, separating concerns and decoupling classes are the spine of LoD. Some can say that objects become more complex, but one thing is for sure, your software components will be more testable, and that is a big win!</p>
 
