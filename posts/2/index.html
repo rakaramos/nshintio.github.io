@@ -9,7 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="iOS Simulator has a feature that slows animations, you can toggle it either by pressing ⌘T or choosing Debug &gt; Toggle Slow Animations in Frontmost &hellip;">
+  <meta name="description" content="There are a lot of tools in Xcode that help us during the debugging process. No doubt. Breakpoints for example are these tiny signals that tell the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -52,6 +52,69 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/24/detailed-exceptions/">Detailed Exceptions</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-24T10:00:00+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>There are a lot of tools in Xcode that help us during the debugging process. No doubt. Breakpoints for example are these tiny signals that tell the debugger to temporarily suspend execution of program at a certain point. My favourite type of breakpoints are the exceptional ones. Exceptional breakpoint is this guardian that pauses the execution of our program, as soon as it knows that things are going to be pretty bad.
+When this happens, we are usually presented with all the stack trace and in the blink of an eye we know what happened that was bad. This is the usual scenario.</p>
+
+<p>But sometimes we see things like that:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>*** Assertion failure in -[UITableView _endCellAnimationsWithContext:], /SourceCache/UIKit_Sim/UIKit-3347.44/UITableView.m:1623</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Which with tells us literally nothing, when we are not familiar enough with the code that we are working. We get sterile error message that tells us that we are doing something wrong with UITableView animations, but it&rsquo;s all we get out of the box.</p>
+
+<p>However, there is a way to get more detailed info. The thing that we can do to know the issue of our crash is this:</p>
+
+<p><img class="right" src="/images/detailed-exceptions/1.png"></p>
+
+<ol>
+<li>Go do debug navigator</li>
+<li>Select <code>objc_exception_throw</code> frame</li>
+<li>Go to console</li>
+<li>Type in: <code>po $eax</code> when using simulator or <code>po $r0</code> when debugging on a device.</li>
+</ol>
+
+
+<p><img class="center" src="/images/detailed-exceptions/2.png"></p>
+
+<p>This way you get more detailed error description which tells you a lot more about the place that you should be looking for to find your mistake.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -158,6 +221,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using sql as date formatter</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/03/law-of-demeter/">Law Of Demeter</a>
       </li>
     
@@ -171,10 +238,6 @@
     
       <li class="post">
         <a href="/blog/2015/07/12/shared-breakpoints/">Shared breakpoints</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/05/working-with-coretelephony-framework/">Working with Core Telephony framework</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-08-06T08:56:29+02:00</updated>
+  <updated>2015-08-07T08:51:50+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,116 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[Using sql as date formatter]]></title>
+    <link href="http://nshint.io/blog/2015/08/04/using-sql-as-date-formatter/"/>
+    
+    <updated>2015-08-04T20:50:51+02:00</updated>
+    <id>http://nshint.io/blog/2015/08/04/using-sql-as-date-formatter</id>
+    
+    <content type="html"><![CDATA[<p>This post is a quick update to <a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter">Vombat&rsquo;s blog post</a> about using SQL instead of <code>NSDateFormatter</code> when it comes to parsing dates in your project. If you don&rsquo;t read it yet, I will highly recommend to do it now. This time we will use Swift to make same measurements.</p>
+
+<p>TL;DR:</p>
+
+<p>You can use sql database function <code>strftime</code> to get UNIX time from e.g.: ISO8061 date string.</p>
+
+<p>Here is the magic function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">+</span> <span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nf">parseDatesUsingStringArray:</span><span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nv">stringsArray</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">sqlite3</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_open</span><span class="p">(</span><span class="s">&quot;:memory:&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_stmt</span> <span class="o">*</span><span class="n">statement</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_prepare_v2</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="s">&quot;SELECT strftime(&#39;%s&#39;, ?);&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statement</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">datesArray</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="bp">NSInteger</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stringsArray</span><span class="p">.</span><span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSString</span> <span class="o">*</span><span class="n">dateString</span> <span class="o">=</span> <span class="n">stringsArray</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_bind_text</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">dateString</span> <span class="n">UTF8String</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">SQLITE_STATIC</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_step</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">kTimeStamp</span> <span class="n">value</span> <span class="o">=</span> <span class="n">sqlite3_column_int64</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>        <span class="bp">NSDate</span> <span class="o">*</span><span class="n">date</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970</span><span class="p">:</span><span class="n">value</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[</span><span class="n">datesArray</span> <span class="nl">addObject</span><span class="p">:</span><span class="n">date</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_clear_bindings</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_reset</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_close</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">datesArray</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We will use it to replace standard parsing method like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="nl">datesFromNSDateFormatter</span><span class="p">:[</span><span class="bp">NSDate</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="n">string</span> <span class="k">in</span> <span class="n">stringsArray</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">datesFromNSDateFormatter</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">NSDateFormatter</span><span class="p">.</span><span class="n">dateFromISOString</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I did some measurements using iPhone 5S with iOS8.2 in release configuration running exactly same amount of data (One Milion strings with ISO8601 date)</p>
+
+<p>And here are the results:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">NSDateFromatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">73.7988719940186</span> <span class="n">s</span>
+</span><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">SQLDateFormatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">8.51147103309631</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So using SQL to format string into date is pretty fast but acutally slower than objC version (But still at least 10time faster than regular method) So what about Swift?. Nothing really changed, overall results show faster computation but I&rsquo;m using better CPU so <code>NSDateFormatter</code> is still very very slow&hellip; If you like it, sample source code is available on <a href="https://github.com/noxytrux/DateFormatter">Github</a></p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
