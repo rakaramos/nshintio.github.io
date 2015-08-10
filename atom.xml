@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-08-07T08:51:50+02:00</updated>
+  <updated>2015-08-10T09:40:28+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,65 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[NSProgressReporting]]></title>
+    <link href="http://nshint.io/blog/2015/08/09/nsprogressreporting/"/>
+    
+    <updated>2015-08-09T20:00:52+02:00</updated>
+    <id>http://nshint.io/blog/2015/08/09/nsprogressreporting</id>
+    
+    <content type="html"><![CDATA[<p>In iOS7 and OS X 10.9 Apple released NSProgess. Its a nice, helpful piece of code that was supposed to make our coding lifes easier.
+If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper way to use it</a> it can be very beneficial.</p>
+
+<p>Besides of helpfull UserInfo object keys which give us comprehensive text information about progress of our tasks in proper language, NSProgress was supposed to provide us way of compositioning objects into trees. However, first version of class allowed this in an implicit way which does not look very clear first time you learn it.</p>
+
+<p>I will try to present it to you in a short way:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">parentProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">totalUnitCount</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">becomeCurrentWithPendingUnitCount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">childProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">(</span><span class="nl">totalUnitCount</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">resignCurrent</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When applying this approach you have to create child progress using totalUnitCount convenience constructor immediately. You also should document that you support implicit composition in a clear way.</p>
+
+<p>OSX 10.11 and iOS 9.0 provides more explicit way for creating tree structure of NSProgress objects. Things are simple now:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">parentProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="k">let</span> <span class="n">childProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">childProgress</span><span class="p">,</span> <span class="nl">withPendingUnitCount</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There is also one more thing useful thing in process of forwarding progress through our app architecture. When any of your classes is free to attend in NSProgress family tree, simply implement following protocol:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">protocol</span> <span class="nl">NSProgressReporting</span> <span class="p">:</span> <span class="n">NSObjectProtocol</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">var</span> <span class="nl">progress</span><span class="p">:</span> <span class="bp">NSProgress</span> <span class="p">{</span> <span class="kr">get</span> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This way we are able to easily track progress of tree structure of tasks and get our overall progress in an easy, object oriented way.</p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
