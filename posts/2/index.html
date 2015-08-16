@@ -9,7 +9,14 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Internationalizing the users interface in Xcode is really easy. Xcode separates all the texts from your views in a dictionary. However, we can make &hellip;">
+  <meta name="description" content="Do you sometimes see this in your code while performing custom drawing using drawRect? 1
+2
+3
+4
+5
+6
+7
+&lt;Error&gt;: CGContextSaveGState: invalid &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -52,6 +59,69 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/27/tracking-drawing-errors/">Tracking Down Drawing Errors</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-27T11:35:32+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Do you sometimes see this in your code while performing custom drawing using <code>drawRect</code>?</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;Error&gt;: CGContextSaveGState: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextSetBlendMode: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextSetAlpha: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextTranslateCTM: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextScaleCTM: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextDrawImage: invalid context 0x0
+</span><span class='line'>&lt;Error&gt;: CGContextRestoreGState: invalid context 0x0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And as always is very hard to track, because you cannot exactly say which draw command actually cause this or where does it comes from.
+But there is a simple solution to this:</p>
+
+<p>Use this symbolic breakpoint <code>CGPostError</code> in your xcode to stop executing on exact line where drawing error appears.</p>
+
+<p><img class="center" src="/images/track-drawin-errors/screen_cgposterror.png"></p>
+
+<p>Now you can see all callstack and all values to find root cause of incorrect drawing.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -464,6 +534,10 @@ When this happens, we are usually presented with all the stack trace and in the 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout breakpoints</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/09/nsprogressreporting/">NSProgressReporting</a>
       </li>
     
@@ -477,10 +551,6 @@ When this happens, we are usually presented with all the stack trace and in the 
     
       <li class="post">
         <a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase reporting</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/16/uicollectionviews-now-have-easy-reordering/">UICollectionViews now have easy reordering</a>
       </li>
     
   </ul>
