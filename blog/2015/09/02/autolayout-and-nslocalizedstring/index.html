@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Don't forget about UIMottionEffect - NSHint</title>
+  <title>Autolayout and NSLocalizedString - NSHint</title>
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="UIMotionEffects was first introduced in iOS 7. The WWDC session which presented this, amongst other cool things, is named Implementing Engaging UI on &hellip;">
+  <meta name="description" content="A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://nshint.io/blog/2015/08/24/dont-forget-about-uimotioneffects">
+  <link rel="canonical" href="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="NSHint" type="application/atom+xml">
@@ -69,7 +69,7 @@
   <header>
   
     
-      <h1 class="entry-title">Don't Forget About UIMottionEffect</h1>
+      <h1 class="entry-title">Autolayout and NSLocalizedString</h1>
     
   
     
@@ -86,55 +86,44 @@
   
 
 
-<time datetime="2015-08-24T20:00:52+02:00" pubdate data-updated="true"></time>
+<time datetime="2015-09-02T20:00:52+02:00" pubdate data-updated="true"></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p><code>UIMotionEffects</code> was first introduced in iOS 7. The <a href="https://developer.apple.com/videos/enterprise/#30">WWDC session</a> which presented this, amongst other cool things, is named Implementing Engaging UI on iOS. Nevertheless, <code>UIMotionEffects</code> is still overlooked. But not today, let&rsquo;s make something cool with it.</p>
+<div class="entry-content"><p>A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means one thing, and one thing only. Nightmare.</p>
 
-<p>Motion effects is an easy way to react to external variations on the device&rsquo;s orientation. To say, <code>UIKit</code> performs UI changes whenever the user tilts the device, vertically or horizontally.</p>
+<p>Every time a new translation comes, it&rsquo;s necessary to run the application and check for broken layouts. Take this quite simple UI.</p>
 
-<p>Let&rsquo;s use <code>UIInterpolatingMotionEffect</code> a subclass of <code>UIMotionEffects</code>, with <code>MapKit</code>. Notice how appealing it is.</p>
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/01.png" width="375"></p>
 
-<p><img class="center" src="/images/dont-forget-about-motion-effects/01.gif"></p>
+<p>Simple, huh?</p>
 
-<p>Sweet, right?</p>
+<p>All right, here&rsquo;s what you have to do to get covered with future translations, and avoid autolayout nightmares.</p>
 
-<p>Achieving it, is easier than you think. Just a few lines of code and you&rsquo;re good to go:</p>
+<p>Add <code>-NSDoubleLocalizedStrings YES</code> to <code>Arguments Passed On Launch</code> to the <code>Run</code> section at your <code>Project Schemes</code>.</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="n">horizontalMotionEffect</span> <span class="o">=</span> <span class="bp">UIInterpolatingMotionEffect</span><span class="p">(</span><span class="nl">keyPath</span><span class="p">:</span> <span class="s">&quot;center.x&quot;</span><span class="p">,</span> <span class="nl">type</span><span class="p">:</span> <span class="p">.</span><span class="n">TiltAlongHorizontalAxis</span><span class="p">)</span>
-</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">minimumRelativeValue</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
-</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">maximumRelativeValue</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">mapView</span><span class="p">.</span><span class="n">addMotionEffect</span><span class="p">(</span><span class="n">horizontalMotionEffect</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/02.png"></p>
 
+<p>This argument will duplicate all strings loaded using <code>NSLocalizedString</code>.</p>
 
-<p>Think of <code>minimumRelativeValue</code> and <code>maximumRelativeValue</code> as leading and tralling constraints, respectivily, to its <code>superview</code>.</p>
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/03.png" width="375"></p>
 
-<p>That&rsquo;s why you have to create the <code>UIView</code>, <code>MKMapView</code> in this case, outside its <code>superview</code>s bounds. Like so:</p>
+<p>What&rsquo;s better then that? What about finding out unlocalized strings?</p>
 
-<p><img class="center" src="/images/dont-forget-about-motion-effects/02.png"></p>
+<p>So, <code>-NSShowNonLocalizedStrings YES</code> comes to rescue!</p>
 
-<p>As the user tilts the device, <code>UIInterpolatingMotionEffect</code> translates the fixed offset values returned by the system to the range of specified values, then <code>UIKit</code> applies the translated values to any target views.</p>
-
-<p>Don’t forget about this! Details matters and it&rsquo;s what users love in mobile apps!</p>
+<p>Great! Now you go and get yourself a cup of coffee while the translation team does their job :)</p>
 </div>
 
 
   <footer>
-    <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Aug 24</em>
+    <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Sep 2</em>
     <em><div class="sharing">
   
-  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nshint.io/blog/2015/08/24/dont-forget-about-uimotioneffects/" data-via="nshintio" data-counturl="http://nshint.io/blog/2015/08/24/dont-forget-about-uimotioneffects/" >Tweet</a>
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring/" data-via="nshintio" data-counturl="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring/" >Tweet</a>
   
   
   
