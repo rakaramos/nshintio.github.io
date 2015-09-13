@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>NSHint</title>
+  <title>Autolayout and NSLocalizedString - NSHint</title>
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Team Rafael Matt Wojtek Marcin Contributors Kondrat Recent Posts Logging excessive blocks on the main thread Autolayout and NSLocalizedString Don't &hellip;">
+  <meta name="description" content="A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://nshint.io/team">
+  <link rel="canonical" href="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="NSHint" type="application/atom+xml">
@@ -62,48 +62,74 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article role="article">
+      
+<div>
+<article class="hentry" role="article">
   
-  <h1 class="team-title">Team</h1>
-<div id="about">
-    <div class="team">
-        <div class="team-profile">
-        	<img src="/images/rafael.jpeg" class="team-profile-image"/>
-        	<p><a href="https://twitter.com/rakaramos">Rafael</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/mateusz.png" class="team-profile-image">
-        	<p><a href="https://twitter.com/mmatoszko">Matt</a></p>
-        </div>
-        <div class="team-profile">
-        	<img src="/images/wojtek.jpeg" class="team-profile-image">
-        	<p><a href="https://twitter.com/wojteklukaszuk">Wojtek</a></p>
-        </div>
-        <div class="team-profile">
-          <img src="/images/marcin.png" class="team-profile-image">
-          <p><a href="https://twitter.com/noxytrux">Marcin</a></p>
-        </div>
-    </div>
-</div>
+  <header>
+  
+    
+      <h1 class="entry-title">Autolayout and NSLocalizedString</h1>
+    
+  
+    
+      <p class="meta">
+        
 
-<h1 class="team-title">Contributors</h1>
-<div id="about">
-    <div class="team">
-        <div class="team-profile">
-        	<img src="/images/kondrat.jpeg" class="team-profile-image"/>
-        	<p><a href="https://twitter.com/Maroreram">Kondrat</a></p>
-        </div>
-    </div>
-</div>
 
-<div id="social">
-    <a class="twitter" href="http://twitter.com/nshintio" title="Twitter"></a>
-    <a class="github" href="http://github.com/nshintio" title="Github"></a>
-    <a class="mail" href="mailto:nshintio@gmail.com" title="Mail"></a>
-</div>
+
+
+
+
+
 
   
+
+
+<time datetime="2015-09-02T20:00:52+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means one thing, and one thing only. Nightmare.</p>
+
+<p>Every time a new translation comes, it&rsquo;s necessary to run the application and check for broken layouts. Take this quite simple UI.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/01.png" width="375"></p>
+
+<p>Simple, huh?</p>
+
+<p>All right, here&rsquo;s what you have to do to get covered with future translations, and avoid autolayout nightmares.</p>
+
+<p>Add <code>-NSDoubleLocalizedStrings YES</code> to <code>Arguments Passed On Launch</code> to the <code>Run</code> section at your <code>Project Schemes</code>.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/02.png"></p>
+
+<p>This argument will duplicate all strings loaded using <code>NSLocalizedString</code>.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/03.png" width="375"></p>
+
+<p>What&rsquo;s better then that? What about finding out unlocalized strings?</p>
+
+<p>So, <code>-NSShowNonLocalizedStrings YES</code> comes to rescue!</p>
+
+<p>Great! Now you go and get yourself a cup of coffee while the translation team does their job :)</p>
+</div>
+
+
+  <footer>
+    <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Sep 2</em>
+    <em><div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring/" data-via="nshintio" data-counturl="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring/" >Tweet</a>
+  
+  
+  
+</div>
+</em>
+  </footer>
 </article>
 
 </div>

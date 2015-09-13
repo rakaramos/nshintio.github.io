@@ -9,14 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Do you sometimes see this in your code while performing custom drawing using drawRect? 1
-2
-3
-4
-5
-6
-7
-&lt;Error&gt;: CGContextSaveGState: invalid &hellip;">
+  <meta name="description" content="Have you ever encountered a situation where you want to build some record or music app ? But you need to somehow react on a phone call which in many &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,6 +64,352 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/05/working-with-coretelephony-framework/">Working With Core Telephony Framework</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-05T15:52:09+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Have you ever encountered a situation where you want to build some record or music app ? But you need to somehow react on a phone call which in many cases break recording or playing in more advanced app (mostly when it comes to <code>CoreAudio</code>) or switch UI in case of call? <code>CoreTelephony</code> is a great library which will help in most of the situations.</p>
+
+<p>To detect phone call on your iPhone or iPad app (this may be the case now when we use continuity) simply use this piece of code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">#import &lt;CoreTelephony/CTCall.h&gt;</span>
+</span><span class='line'><span class="cp">#import &lt;CoreTelephony/CTCallCenter.h&gt;</span>
+</span><span class='line'><span class="cp">#import &lt;CoreTelephony/CTCarrier.h&gt;</span>
+</span><span class='line'><span class="cp">#import &lt;CoreTelephony/CTTelephonyNetworkInfo.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@interface</span> <span class="nc">MMCallNotificationManager</span><span class="p">()</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">strong</span><span class="p">)</span> <span class="bp">CTCallCenter</span> <span class="o">*</span><span class="n">callCenter</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">)</span> <span class="kt">BOOL</span> <span class="n">callWasStarted</span><span class="p">;</span>
+</span><span class='line'><span class="k">@end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@implementation</span> <span class="nc">MMCallNotificationManager</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">-</span> <span class="p">(</span><span class="kt">instancetype</span><span class="p">)</span><span class="nf">init</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="nb">self</span> <span class="o">=</span> <span class="p">[</span><span class="nb">super</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nb">self</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">callCenter</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">CTCallCenter</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">callWasStarted</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">__weak</span> <span class="n">__typeof__</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span> <span class="n">weakSelf</span> <span class="o">=</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">callCenter</span> <span class="nl">setCallEventHandler</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="bp">CTCall</span> <span class="o">*</span><span class="n">call</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">if</span> <span class="p">([[</span><span class="n">call</span> <span class="n">callState</span><span class="p">]</span> <span class="nl">isEqual</span><span class="p">:</span><span class="n">CTCallStateIncoming</span><span class="p">]</span> <span class="o">||</span>
+</span><span class='line'>                <span class="p">[[</span><span class="n">call</span> <span class="n">callState</span><span class="p">]</span> <span class="nl">isEqual</span><span class="p">:</span><span class="n">CTCallStateDialing</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">weakSelf</span><span class="p">.</span><span class="n">callWasStarted</span> <span class="o">==</span> <span class="nb">NO</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="n">weakSelf</span><span class="p">.</span><span class="n">callWasStarted</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;Call was started.&quot;</span><span class="p">);</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">([[</span><span class="n">call</span> <span class="n">callState</span><span class="p">]</span> <span class="nl">isEqual</span><span class="p">:</span><span class="n">CTCallStateDisconnected</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="k">if</span> <span class="p">(</span><span class="n">weakSelf</span><span class="p">.</span><span class="n">callWasStarted</span> <span class="o">==</span> <span class="nb">YES</span><span class="p">)</span>
+</span><span class='line'>                <span class="p">{</span>
+</span><span class='line'>                    <span class="n">weakSelf</span><span class="p">.</span><span class="n">callWasStarted</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;Call was ended.&quot;</span><span class="p">);</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Another example of usage may be detecting if we have simcard installed on our device. For example our application allows user to call someone within the app, but we want to inform if the card is removed. Of course we can use some iOS urls for that, such as: <code>telprompt:</code> but they likely breaks UI e.g: in iOS8 it blinks twice which is not a nice effect&hellip;</p>
+
+<p>So to detect if simcard is in place, use this code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="cp">#import &lt;CoreTelephony/CTTelephonyNetworkInfo.h&gt;</span>
+</span><span class='line'><span class="cp">#import &lt;CoreTelephony/CTCarrier.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">-</span> <span class="p">(</span><span class="kt">IBAction</span><span class="p">)</span><span class="nf">handleCallButtonPress:</span><span class="p">(</span><span class="kt">id</span><span class="p">)</span><span class="nv">sender</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="bp">CTTelephonyNetworkInfo</span> <span class="o">*</span><span class="n">networkInfo</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">CTTelephonyNetworkInfo</span> <span class="n">alloc</span><span class="p">]</span> <span class="n">init</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="bp">NSString</span> <span class="o">*</span><span class="n">code</span> <span class="o">=</span> <span class="p">[</span><span class="n">networkInfo</span><span class="p">.</span><span class="n">subscriberCellularProvider</span> <span class="n">mobileCountryCode</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//this is nil if you take out sim card.</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">code</span> <span class="o">==</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="bp">UIAlertView</span> <span class="o">*</span><span class="n">alertView</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UIAlertView</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithTitle</span><span class="p">:</span><span class="n">NSLocalizedString</span><span class="p">(</span><span class="s">@&quot;aler.error&quot;</span><span class="p">,</span><span class="nb">nil</span><span class="p">)</span>
+</span><span class='line'>                                                            <span class="nl">message</span><span class="p">:</span><span class="n">NSLocalizedString</span><span class="p">(</span><span class="s">@&quot;alert.message.no_sim_card&quot;</span><span class="p">,</span><span class="nb">nil</span><span class="p">)</span>
+</span><span class='line'>                                                           <span class="nl">delegate</span><span class="p">:</span><span class="nb">nil</span>
+</span><span class='line'>                                                  <span class="nl">cancelButtonTitle</span><span class="p">:</span><span class="n">NSLocalizedString</span><span class="p">(</span><span class="s">@&quot;alert.button_dimiss&quot;</span><span class="p">,</span> <span class="nb">nil</span><span class="p">)</span>
+</span><span class='line'>                                                  <span class="nl">otherButtonTitles</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[</span><span class="n">alertView</span> <span class="n">show</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//make regular phone prompt (with call confirmation)</span>
+</span><span class='line'>    <span class="bp">NSURL</span> <span class="o">*</span><span class="n">phoneUrl</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSURL</span> <span class="nl">URLWithString</span><span class="p">:[</span><span class="bp">NSString</span>  <span class="nl">stringWithFormat</span><span class="p">:</span><span class="s">@&quot;telprompt://%@&quot;</span><span class="p">,</span><span class="n">phoneNumberString</span><span class="p">]];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">([[</span><span class="bp">UIApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">canOpenURL</span><span class="p">:</span><span class="n">phoneUrl</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[[</span><span class="bp">UIApplication</span> <span class="n">sharedApplication</span><span class="p">]</span> <span class="nl">openURL</span><span class="p">:</span><span class="n">phoneUrl</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I hope this will help you reduce potential edge cases in your future apps.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/04/how-to-animate-uilabel-properties/">How to Animate UILabel Properties</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-04T15:53:09+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><code>UILabel</code> properties cannot be easy animated due to some various reasons, so code like this will have no effect on it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='objC'><span class='line'><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">blueColor</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">[</span><span class="bp">UIView</span> <span class="nl">animateWithDuration</span><span class="p">:</span><span class="mf">0.3</span>
+</span><span class='line'>                  <span class="nl">animation</span><span class="p">:</span><span class="o">^</span><span class="p">{</span>
+</span><span class='line'>  
+</span><span class='line'>                      <span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">];</span>
+</span><span class='line'>                  <span class="p">}];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But there is a simple solution. Instead of animating property we will perform transition on object itself.</p>
+
+<p>Using <code>transitionWithView</code> should solve our problem:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='objC'><span class='line'><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">blueColor</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">[</span><span class="bp">UIView</span> <span class="nl">transitionWithView</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span>
+</span><span class='line'>                  <span class="nl">duration</span><span class="p">:</span><span class="mf">0.3</span>
+</span><span class='line'>                   <span class="nl">options</span><span class="p">:</span><span class="n">UIViewAnimationOptionTransitionCrossDissolve</span>
+</span><span class='line'>                <span class="nl">animations</span><span class="p">:</span><span class="o">^</span><span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>                      <span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="p">}</span> <span class="nl">completion</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This creates nice fade in/out animation which is exactly what we want.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/">Fixing UICatalog Invalid Asset Error</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-02T17:29:00+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
+
+<p><img class="center" src="/images/uicatalog_invalid_asset/null_asset.png"></p>
+
+<p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -546,6 +885,18 @@ When this happens, we are usually presented with all the stack trace and in the 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/dont-forget-about-uimotioneffects/">Don't forget about UIMottionEffect</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout breakpoints</a>
       </li>
     
@@ -553,48 +904,7 @@ When this happens, we are usually presented with all the stack trace and in the 
         <a href="/blog/2015/08/09/nsprogressreporting/">NSProgressReporting</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using sql as date formatter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/03/law-of-demeter/">Law Of Demeter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase reporting</a>
-      </li>
-    
   </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/nshintio">@nshintio</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'nshintio',
-            count: 2,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
 </section>
 
 

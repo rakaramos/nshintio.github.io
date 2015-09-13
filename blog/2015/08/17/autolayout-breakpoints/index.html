@@ -132,7 +132,7 @@
 <p>Honestly, that won&rsquo;t help much, because basically it&rsquo;ll just stop the execution and leave you up with <code>LLDB</code>, alone in the dark.</p>
 
 <p>But there&rsquo;s a little trick you can do to enhance the preceding symbolic breakpoint.
-Adding <code>po [[UIWindow keyWindow] _autolayoutTrace]</code> to it.</p>
+Adding <code>po [[UIWindow keyWindow] _autolayoutTrace]</code> to it (for Obj-C projects) or <code>expr -l objc++ -O -- [[UIWindow keyWindow] _autolayoutTrace]</code> (for Swift projects).</p>
 
 <p><img class="center" src="/images/autolayout-breakpoints/2.png"></p>
 
@@ -162,6 +162,8 @@ And if that&rsquo;s not enough for you to find out your autolayout issue, try ch
 
 
 <p>Fear no more young Padawan, make symbolic breakpoints and <code>LLDB</code> work for you!</p>
+
+<p>I would like to thank <a href="https://twitter.com/PorterHoskins">Porter Hoskins</a> for pointing out the correct <code>LLDB</code> command for Swift.</p>
 </div>
 
 
@@ -187,6 +189,18 @@ And if that&rsquo;s not enough for you to find out your autolayout issue, try ch
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/dont-forget-about-uimotioneffects/">Don't forget about UIMottionEffect</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout breakpoints</a>
       </li>
     
@@ -194,48 +208,7 @@ And if that&rsquo;s not enough for you to find out your autolayout issue, try ch
         <a href="/blog/2015/08/09/nsprogressreporting/">NSProgressReporting</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using sql as date formatter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/03/law-of-demeter/">Law Of Demeter</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase reporting</a>
-      </li>
-    
   </ul>
-</section>
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating...</li>
-  </ul>
-  
-  <a href="https://github.com/nshintio">@nshintio</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'nshintio',
-            count: 2,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/javascripts/github.js" type="text/javascript"> </script>
 </section>
 
 
