@@ -9,14 +9,14 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="UILabel properties cannot be easy animated due to some various reasons, so code like this will have no effect on it: 1
+  <meta name="description" content="Do you sometimes see this in your code while performing custom drawing using drawRect? 1
 2
 3
 4
 5
 6
 7
-self.someLabel. &hellip;">
+&lt;Error&gt;: CGContextSaveGState: invalid &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,136 +71,6 @@ self.someLabel. &hellip;">
     <div id="content">
       <div class="blog-index">
   
-  
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/04/how-to-animate-uilabel-properties/">How to Animate UILabel Properties</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-04T15:53:09+02:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><code>UILabel</code> properties cannot be easy animated due to some various reasons, so code like this will have no effect on it:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='objC'><span class='line'><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">blueColor</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="bp">UIView</span> <span class="nl">animateWithDuration</span><span class="p">:</span><span class="mf">0.3</span>
-</span><span class='line'>                  <span class="nl">animation</span><span class="p">:</span><span class="o">^</span><span class="p">{</span>
-</span><span class='line'>  
-</span><span class='line'>                      <span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">];</span>
-</span><span class='line'>                  <span class="p">}];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>But there is a simple solution. Instead of animating property we will perform transition on object itself.</p>
-
-<p>Using <code>transitionWithView</code> should solve our problem:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='objC'><span class='line'><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">blueColor</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="bp">UIView</span> <span class="nl">transitionWithView</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span>
-</span><span class='line'>                  <span class="nl">duration</span><span class="p">:</span><span class="mf">0.3</span>
-</span><span class='line'>                   <span class="nl">options</span><span class="p">:</span><span class="n">UIViewAnimationOptionTransitionCrossDissolve</span>
-</span><span class='line'>                <span class="nl">animations</span><span class="p">:</span><span class="o">^</span><span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>                      <span class="nb">self</span><span class="p">.</span><span class="n">someLabel</span><span class="p">.</span><span class="n">textColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>                <span class="p">}</span> <span class="nl">completion</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This creates nice fade in/out animation which is exactly what we want.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/02/fixing-uicatalog-invalid-asset-error/">Fixing UICatalog Invalid Asset Error</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-02T17:29:00+02:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>CUICatalog: Invalid asset name supplied: (null), or invalid scale factor: 2.000000</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
-
-<p><img class="center" src="/images/uicatalog_invalid_asset/null_asset.png"></p>
-
-<p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
-</div>
-  
-  
-
-
-    </article>
   
   
     <article>
@@ -676,14 +546,6 @@ When this happens, we are usually presented with all the stack trace and in the 
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/24/dont-forget-about-uimotioneffects/">Don't forget about UIMottionEffect</a>
-      </li>
-    
-      <li class="post">
         <a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout breakpoints</a>
       </li>
     
@@ -695,7 +557,44 @@ When this happens, we are usually presented with all the stack trace and in the 
         <a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using sql as date formatter</a>
       </li>
     
+      <li class="post">
+        <a href="/blog/2015/08/03/law-of-demeter/">Law Of Demeter</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase reporting</a>
+      </li>
+    
   </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/nshintio">@nshintio</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'nshintio',
+            count: 2,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
 </section>
 
 

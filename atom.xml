@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-09-02T13:42:46+02:00</updated>
+  <updated>2015-08-19T17:06:56+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,87 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    
-    <title type="html"><![CDATA[Autolayout and NSLocalizedString]]></title>
-    <link href="http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring/"/>
-    
-    <updated>2015-09-02T20:00:52+02:00</updated>
-    <id>http://nshint.io/blog/2015/09/02/autolayout-and-nslocalizedstring</id>
-    
-    <content type="html"><![CDATA[<p>A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means one thing, and one thing only. Nightmare.</p>
-
-<p>Every time a new translation comes, it&rsquo;s necessary to run the application and check for broken layouts. Take this quite simple UI.</p>
-
-<p><img class="center" src="http://nshint.io/images/autolayout-and-nslocalizedstrings/01.png" width="375"></p>
-
-<p>Simple, huh?</p>
-
-<p>All right, here&rsquo;s what you have to do to get covered with future translations, and avoid autolayout nightmares.</p>
-
-<p>Add <code>-NSDoubleLocalizedStrings YES</code> to <code>Arguments Passed On Launch</code> to the <code>Run</code> section at your <code>Project Schemes</code>.</p>
-
-<p><img class="center" src="http://nshint.io/images/autolayout-and-nslocalizedstrings/02.png"></p>
-
-<p>This argument will duplicate all strings loaded using <code>NSLocalizedString</code>.</p>
-
-<p><img class="center" src="http://nshint.io/images/autolayout-and-nslocalizedstrings/03.png" width="375"></p>
-
-<p>What&rsquo;s better then that? What about finding out unlocalized strings?</p>
-
-<p>So, <code>-NSShowNonLocalizedStrings YES</code> comes to rescue!</p>
-
-<p>Great! Now you go and get yourself a cup of coffee while the translation team does their job :)</p>
-]]></content>
-    
-  </entry>
-  
-  <entry>
-    
-    <title type="html"><![CDATA[Don't forget about UIMottionEffect]]></title>
-    <link href="http://nshint.io/blog/2015/08/24/dont-forget-about-uimotioneffects/"/>
-    
-    <updated>2015-08-24T20:00:52+02:00</updated>
-    <id>http://nshint.io/blog/2015/08/24/dont-forget-about-uimotioneffects</id>
-    
-    <content type="html"><![CDATA[<p><code>UIMotionEffects</code> was first introduced in iOS 7. The <a href="https://developer.apple.com/videos/enterprise/#30">WWDC session</a> which presented this, amongst other cool things, is named Implementing Engaging UI on iOS. Nevertheless, <code>UIMotionEffects</code> is still overlooked. But not today, let&rsquo;s make something cool with it.</p>
-
-<p>Motion effects is an easy way to react to external variations on the device&rsquo;s orientation. To say, <code>UIKit</code> performs UI changes whenever the user tilts the device, vertically or horizontally.</p>
-
-<p>Let&rsquo;s use <code>UIInterpolatingMotionEffect</code> a subclass of <code>UIMotionEffects</code>, with <code>MapKit</code>. Notice how appealing it is.</p>
-
-<p><img class="center" src="http://nshint.io/images/dont-forget-about-motion-effects/01.gif"></p>
-
-<p>Sweet, right?</p>
-
-<p>Achieving it, is easier than you think. Just a few lines of code and you&rsquo;re good to go:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="n">horizontalMotionEffect</span> <span class="o">=</span> <span class="bp">UIInterpolatingMotionEffect</span><span class="p">(</span><span class="nl">keyPath</span><span class="p">:</span> <span class="s">&quot;center.x&quot;</span><span class="p">,</span> <span class="nl">type</span><span class="p">:</span> <span class="p">.</span><span class="n">TiltAlongHorizontalAxis</span><span class="p">)</span>
-</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">minimumRelativeValue</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
-</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">maximumRelativeValue</span> <span class="o">=</span> <span class="mi">100</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">mapView</span><span class="p">.</span><span class="n">addMotionEffect</span><span class="p">(</span><span class="n">horizontalMotionEffect</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Think of <code>minimumRelativeValue</code> and <code>maximumRelativeValue</code> as leading and tralling constraints, respectivily, to its <code>superview</code>.</p>
-
-<p>That&rsquo;s why you have to create the <code>UIView</code>, <code>MKMapView</code> in this case, outside its <code>superview</code>s bounds. Like so:</p>
-
-<p><img class="center" src="http://nshint.io/images/dont-forget-about-motion-effects/02.png"></p>
-
-<p>As the user tilts the device, <code>UIInterpolatingMotionEffect</code> translates the fixed offset values returned by the system to the range of specified values, then <code>UIKit</code> applies the translated values to any target views.</p>
-
-<p>Don’t forget about this! Details matters and it&rsquo;s what users love in mobile apps!</p>
-]]></content>
-    
-  </entry>
   
   <entry>
     
@@ -141,7 +60,7 @@
 <p>Honestly, that won&rsquo;t help much, because basically it&rsquo;ll just stop the execution and leave you up with <code>LLDB</code>, alone in the dark.</p>
 
 <p>But there&rsquo;s a little trick you can do to enhance the preceding symbolic breakpoint.
-Adding <code>po [[UIWindow keyWindow] _autolayoutTrace]</code> to it (for Obj-C projects) or <code>expr -l objc++ -O -- [[UIWindow keyWindow] _autolayoutTrace]</code> (for Swift projects).</p>
+Adding <code>po [[UIWindow keyWindow] _autolayoutTrace]</code> to it.</p>
 
 <p><img class="center" src="http://nshint.io/images/autolayout-breakpoints/2.png"></p>
 
@@ -171,8 +90,6 @@ And if that&rsquo;s not enough for you to find out your autolayout issue, try ch
 
 
 <p>Fear no more young Padawan, make symbolic breakpoints and <code>LLDB</code> work for you!</p>
-
-<p>I would like to thank <a href="https://twitter.com/PorterHoskins">Porter Hoskins</a> for pointing out the correct <code>LLDB</code> command for Swift.</p>
 ]]></content>
     
   </entry>
