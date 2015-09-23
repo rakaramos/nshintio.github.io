@@ -1,1 +1,1134 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>NSHint</title>
+  <meta name="author" content="NSHint">
+
+  
+  <meta name="description" content="Gone are the days where there was just one iPhone for developers as a target. Now we have to support multiple devices with different screen sizes. &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://nshint.io">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="NSHint" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-66445219-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
+	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+
+</header>
+  <nav role="navigation"><ul class="main-navigation">
+  <li><a href="/">articles</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="/team">team</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/23/uitraitcollection-trick/">UITraitCollection Trick</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-23T19:15:43+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Gone are the days where there was just one iPhone for developers as a target. Now we have to support multiple devices with different screen sizes. Fortunately, we have autolayout, which solves a part of this design equation, the other part is solved with <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UITraitCollection_ClassReference/"><code>UITraitCollection</code></a>. Trait collection object has two size classes: horizontal and vertical. Each of these classes has three possible values: compact, regular or any. The current device+orientation can be described as a combination of the sizes.</p>
+
+<p><img class="center" src="/images/uitraitcollection_trick/1.png"></p>
+
+<p>The best thing is that storyboards and nib files support these size classes. We can make layout changes directly onto them. Every view or auto-layout constraint can exist in one or several other size classes. So it is possible to support multiple devices and orientations without any code. Nevertheless there is a case, which is not covered at all. Imagine that you support only portrait mode and the designer wishes to make a difference between iPhone 5 and iPhone 6+ screen. In this case, size classes are not much helpful. However, we can leverage them in an unusual way.</p>
+
+<p><code>UITraitEnvironment</code> is a protocol which provides access to trait collection. Its conformed by most of the objects in view hierarchy: <code>UIScreen</code>, <code>UIWindow</code>, <code>UIViewController</code>, <code>UIView</code>. Every child inherits the trait collection object from its parent. The trick is to override the trait collection in <code>UIWindow</code> and return a custom value for iPhone 6+ device. Take a look:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="p">@</span><span class="n">objc</span> <span class="n">public</span> <span class="k">class</span> <span class="nl">Window</span><span class="p">:</span> <span class="bp">UIWindow</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kr">override</span> <span class="n">public</span> <span class="k">var</span> <span class="nl">traitCollection</span><span class="p">:</span> <span class="n">UITraitCollection</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="n">DeviceType</span><span class="p">.</span><span class="n">isIPhone6P</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">var</span> <span class="n">collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">horizontalSizeClass</span><span class="p">:</span> <span class="p">.</span><span class="n">Compact</span><span class="p">),</span>
+</span><span class='line'>                <span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">verticalSizeClass</span><span class="p">:</span> <span class="p">.</span><span class="n">Compact</span><span class="p">)]</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span> <span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">traitsFromCollections</span><span class="p">:</span> <span class="n">collections</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">super</span><span class="p">.</span><span class="n">traitCollection</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We override trait collection in <code>UIWindow</code> just for iPhone 6+ model. Now we can make layout changes in storyboard directly for this model by changing size class selectors at the bottom of Interface Builder pane. Trait collection with horizontal compact class and vertical compact class is reserved for iPhone 6+.</p>
+
+<p><img class="center" src="/images/uitraitcollection_trick/2.png"></p>
+
+<p>We can install additional views and change layout constraints only for iPhone 6+.</p>
+
+<p><img class="center" src="/images/uitraitcollection_trick/3.png"><br/>
+<img class="center" src="/images/uitraitcollection_trick/4.png"></p>
+
+<p>Tell your designer about that cool hint and you will probably get some treats. The project shown above can be found on <a href="https://github.com/nshintio/uitraitcollection-trick">GitHub</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging Excessive Blocks on the Main Thread</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-14T01:30:09+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Logging excessive blocks on the main thread</p>
+
+<p>Having an application running at 60 FPS is every programmers dream, and users delight.
+The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s a dreadful crime in mobile world nowadays. Users try to interact at any moment and according to Murphy’s law they will find all your mistakes. So, you better keep the main thread slim.</p>
+
+<p>To keep things smoothly in the users interface, every single operation that&rsquo;s schedule to run into the main thread can take longer than 16 milliseconds, and there&rsquo;s a handy solution to get you covered. It&rsquo;s a little library called <a href="https://github.com/wojteklukaszuk/Watchdog">Watchdog</a>.</p>
+
+<p>Watchdog is a very simple and straightforward library that logs excessive blocking on the main thread. Let&rsquo;s take a look at how to use it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">watchdog</span> <span class="o">=</span> <span class="n">Watchdog</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Just instantiate it with a number of seconds that you want for Watchdog to consider that the main thread blocked. Also don&rsquo;t forget to retain Watchdog somewhere or it will get released when it goes out of scope. Whenever the main thread is blocked for more than the value previously defined, it will print out logs, just like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="err">👮</span> <span class="n">Main</span> <span class="kr">thread</span> <span class="n">was</span> <span class="n">blocked</span> <span class="k">for</span> <span class="mf">1.25</span><span class="n">s</span> <span class="err">👮</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Pretty nice debugging tool!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-02T20:00:52+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means one thing, and one thing only. Nightmare.</p>
+
+<p>Every time a new translation comes, it&rsquo;s necessary to run the application and check for broken layouts. Take this quite simple UI.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/01.png" width="375"></p>
+
+<p>Simple, huh?</p>
+
+<p>All right, here&rsquo;s what you have to do to get covered with future translations, and avoid autolayout nightmares.</p>
+
+<p>Add <code>-NSDoubleLocalizedStrings YES</code> to <code>Arguments Passed On Launch</code> to the <code>Run</code> section at your <code>Project Schemes</code>.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/02.png"></p>
+
+<p>This argument will duplicate all strings loaded using <code>NSLocalizedString</code>.</p>
+
+<p><img class="center" src="/images/autolayout-and-nslocalizedstrings/03.png" width="375"></p>
+
+<p>What&rsquo;s better then that? What about finding out unlocalized strings?</p>
+
+<p>So, <code>-NSShowNonLocalizedStrings YES</code> comes to rescue!</p>
+
+<p>Great! Now you go and get yourself a cup of coffee while the translation team does their job :)</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/24/dont-forget-about-uimotioneffects/">Don't Forget About UIMottionEffect</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-24T20:00:52+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><code>UIMotionEffects</code> was first introduced in iOS 7. The <a href="https://developer.apple.com/videos/enterprise/#30">WWDC session</a> which presented this, amongst other cool things, is named Implementing Engaging UI on iOS. Nevertheless, <code>UIMotionEffects</code> is still overlooked. But not today, let&rsquo;s make something cool with it.</p>
+
+<p>Motion effects is an easy way to react to external variations on the device&rsquo;s orientation. To say, <code>UIKit</code> performs UI changes whenever the user tilts the device, vertically or horizontally.</p>
+
+<p>Let&rsquo;s use <code>UIInterpolatingMotionEffect</code> a subclass of <code>UIMotionEffects</code>, with <code>MapKit</code>. Notice how appealing it is.</p>
+
+<p><img class="center" src="/images/dont-forget-about-motion-effects/01.gif"></p>
+
+<p>Sweet, right?</p>
+
+<p>Achieving it, is easier than you think. Just a few lines of code and you&rsquo;re good to go:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="n">horizontalMotionEffect</span> <span class="o">=</span> <span class="bp">UIInterpolatingMotionEffect</span><span class="p">(</span><span class="nl">keyPath</span><span class="p">:</span> <span class="s">&quot;center.x&quot;</span><span class="p">,</span> <span class="nl">type</span><span class="p">:</span> <span class="p">.</span><span class="n">TiltAlongHorizontalAxis</span><span class="p">)</span>
+</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">minimumRelativeValue</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+</span><span class='line'><span class="n">horizontalMotionEffect</span><span class="p">.</span><span class="n">maximumRelativeValue</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mapView</span><span class="p">.</span><span class="n">addMotionEffect</span><span class="p">(</span><span class="n">horizontalMotionEffect</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Think of <code>minimumRelativeValue</code> and <code>maximumRelativeValue</code> as leading and tralling constraints, respectivily, to its <code>superview</code>.</p>
+
+<p>That&rsquo;s why you have to create the <code>UIView</code>, <code>MKMapView</code> in this case, outside its <code>superview</code>s bounds. Like so:</p>
+
+<p><img class="center" src="/images/dont-forget-about-motion-effects/02.png"></p>
+
+<p>As the user tilts the device, <code>UIInterpolatingMotionEffect</code> translates the fixed offset values returned by the system to the range of specified values, then <code>UIKit</code> applies the translated values to any target views.</p>
+
+<p>Don’t forget about this! Details matters and it&rsquo;s what users love in mobile apps!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout Breakpoints</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-17T20:00:52+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Auto layout has become a crucial tool for iOS and OS X development. It makes creating layout for multiple screen sizes easy peasy. But sometimes it can drive you crazy, with verbose and misleading logs.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Unable to simultaneously satisfy constraints.
+</span><span class='line'>Probably at least one of the constraints in the following list is one you don't want.
+</span><span class='line'>Try this:
+</span><span class='line'>
+</span><span class='line'>(1) look at each constraint and try to figure out which you don't expect;
+</span><span class='line'>(2) find the code that added the unwanted constraint or constraints and fix it.
+</span><span class='line'>(Note: If you're seeing NSAutoresizingMaskLayoutConstraints that you don't understand, refer to the documentation for the UIView property translatesAutoresizingMaskIntoConstraints)
+</span><span class='line'>
+</span><span class='line'>(...........)
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>Make a symbolic breakpoint at UIViewAlertForUnsatisfiableConstraints to catch this in the debugger.
+</span><span class='line'>The methods in the UIConstraintBasedLayoutDebugging category on UIView listed in &lt;UIKit/UIView.h&gt; may also be helpful.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&rsquo;s a huge log! And I cut off the <code>NSLayoutConstraint</code> part. Yet, the second last line is giving a clue in which direction to go to fix this issue. Symbolic breakpoint at <code>UIViewAlertForUnsatisfiableConstraints</code>.</p>
+
+<p>All right, here&rsquo;s what Xcode want&rsquo;s you to do:</p>
+
+<p><img class="center" src="/images/autolayout-breakpoints/1.png"></p>
+
+<p>Honestly, that won&rsquo;t help much, because basically it&rsquo;ll just stop the execution and leave you up with <code>LLDB</code>, alone in the dark.</p>
+
+<p>But there&rsquo;s a little trick you can do to enhance the preceding symbolic breakpoint.
+Adding <code>po [[UIWindow keyWindow] _autolayoutTrace]</code> to it (for Obj-C projects) or <code>expr -l objc++ -O -- [[UIWindow keyWindow] _autolayoutTrace]</code> (for Swift projects).</p>
+
+<p><img class="center" src="/images/autolayout-breakpoints/2.png"></p>
+
+<p>Now, on console, you&rsquo;ll see all the <code>UIView</code> hierarchy and exactly where it has ambiguity.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="nl">UIWindow</span><span class="p">:</span><span class="mh">0x7f9481c93360</span>
+</span><span class='line'><span class="o">|</span>   <span class="err">•</span><span class="nl">UIView</span><span class="p">:</span><span class="mh">0x7f9481c9d680</span>
+</span><span class='line'><span class="o">|</span>   <span class="o">|</span>   <span class="o">*</span><span class="nl">UIView</span><span class="p">:</span><span class="mh">0x7f9481c9d990</span><span class="o">-</span> <span class="n">AMBIGUOUS</span> <span class="n">LAYOUT</span> <span class="k">for</span> <span class="nl">UIView</span><span class="p">:</span><span class="mh">0x7f9481c9d990</span><span class="p">.</span><span class="n">minX</span><span class="p">{</span><span class="kt">id</span><span class="o">:</span> <span class="mi">13</span><span class="p">},</span> <span class="nl">UIView</span><span class="p">:</span><span class="mh">0x7f9481c9d990</span><span class="p">.</span><span class="n">minY</span><span class="p">{</span><span class="kt">id</span><span class="o">:</span> <span class="mi">16</span><span class="p">}</span>
+</span><span class='line'><span class="o">|</span>   <span class="o">|</span>   <span class="o">*</span><span class="nl">_UILayoutGuide</span><span class="p">:</span><span class="mh">0x7f9481c9e160</span><span class="o">-</span> <span class="n">AMBIGUOUS</span> <span class="n">LAYOUT</span> <span class="k">for</span> <span class="nl">_UILayoutGuide</span><span class="p">:</span><span class="mh">0x7f9481c9e160</span><span class="p">.</span><span class="n">minY</span><span class="p">{</span><span class="kt">id</span><span class="o">:</span> <span class="mi">17</span><span class="p">}</span>
+</span><span class='line'><span class="o">|</span>   <span class="o">|</span>   <span class="o">*</span><span class="nl">_UILayoutGuide</span><span class="p">:</span><span class="mh">0x7f9481c9ebb0</span><span class="o">-</span> <span class="n">AMBIGUOUS</span> <span class="n">LAYOUT</span> <span class="k">for</span> <span class="nl">_UILayoutGuide</span><span class="p">:</span><span class="mh">0x7f9481c9ebb0</span><span class="p">.</span><span class="n">minY</span><span class="p">{</span><span class="kt">id</span><span class="o">:</span> <span class="mi">27</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that as you hit continue it&rsquo;ll stop at every ambiguous layout you may have.
+And if that&rsquo;s not enough for you to find out your autolayout issue, try changing the view&rsquo;s color, who knows?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">(</span><span class="n">lldb</span><span class="p">)</span> <span class="n">expr</span> <span class="p">((</span><span class="bp">UIView</span> <span class="o">*</span><span class="p">)</span><span class="mh">0x7f9ea3d43410</span><span class="p">).</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">]</span>
+</span><span class='line'><span class="p">(</span><span class="n">UICachedDeviceRGBColor</span> <span class="o">*</span><span class="p">)</span> <span class="err">$</span><span class="mi">1</span> <span class="o">=</span> <span class="mh">0x00007f9ea3d43410</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fear no more young Padawan, make symbolic breakpoints and <code>LLDB</code> work for you!</p>
+
+<p>I would like to thank <a href="https://twitter.com/PorterHoskins">Porter Hoskins</a> for pointing out the correct <code>LLDB</code> command for Swift.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/09/nsprogressreporting/">NSProgressReporting</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-09T20:00:52+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In iOS7 and OS X 10.9 Apple released NSProgess. Its a nice, helpful piece of code that was supposed to make our coding lifes easier.
+If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper way to use it</a> it can be very beneficial.</p>
+
+<p>Besides of helpfull UserInfo object keys which give us comprehensive text information about progress of our tasks in proper language, NSProgress was supposed to provide us way of compositioning objects into trees. However, first version of class allowed this in an implicit way which does not look very clear first time you learn it.</p>
+
+<p>I will try to present it to you in a short way:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">parentProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">totalUnitCount</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">becomeCurrentWithPendingUnitCount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">childProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">(</span><span class="nl">totalUnitCount</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">resignCurrent</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When applying this approach you have to create child progress using totalUnitCount convenience constructor immediately. You also should document that you support implicit composition in a clear way.</p>
+
+<p>OSX 10.11 and iOS 9.0 provides more explicit way for creating tree structure of NSProgress objects. Things are simple now:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">parentProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="k">let</span> <span class="n">childProgress</span> <span class="o">=</span> <span class="bp">NSProgress</span><span class="p">()</span>
+</span><span class='line'><span class="n">parentProgress</span><span class="p">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">childProgress</span><span class="p">,</span> <span class="nl">withPendingUnitCount</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There is also one more thing useful thing in process of forwarding progress through our app architecture. When any of your classes is free to attend in NSProgress family tree, simply implement following protocol:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">protocol</span> <span class="nl">NSProgressReporting</span> <span class="p">:</span> <span class="n">NSObjectProtocol</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">var</span> <span class="nl">progress</span><span class="p">:</span> <span class="bp">NSProgress</span> <span class="p">{</span> <span class="kr">get</span> <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This way we are able to easily track progress of tree structure of tasks and get our overall progress in an easy, object oriented way.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using Sql as Date Formatter</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-04T20:50:51+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This post is a quick update to <a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter">Vombat&rsquo;s blog post</a> about using SQL instead of <code>NSDateFormatter</code> when it comes to parsing dates in your project. If you don&rsquo;t read it yet, I will highly recommend to do it now. This time we will use Swift to make same measurements.</p>
+
+<p>TL;DR:</p>
+
+<p>You can use sql database function <code>strftime</code> to get UNIX time from e.g.: ISO8061 date string.</p>
+
+<p>Here is the magic function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">+</span> <span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nf">parseDatesUsingStringArray:</span><span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nv">stringsArray</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">sqlite3</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_open</span><span class="p">(</span><span class="s">&quot;:memory:&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_stmt</span> <span class="o">*</span><span class="n">statement</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_prepare_v2</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="s">&quot;SELECT strftime(&#39;%s&#39;, ?);&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statement</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">datesArray</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="bp">NSInteger</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stringsArray</span><span class="p">.</span><span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSString</span> <span class="o">*</span><span class="n">dateString</span> <span class="o">=</span> <span class="n">stringsArray</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_bind_text</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">dateString</span> <span class="n">UTF8String</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">SQLITE_STATIC</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_step</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">kTimeStamp</span> <span class="n">value</span> <span class="o">=</span> <span class="n">sqlite3_column_int64</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>        <span class="bp">NSDate</span> <span class="o">*</span><span class="n">date</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970</span><span class="p">:</span><span class="n">value</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[</span><span class="n">datesArray</span> <span class="nl">addObject</span><span class="p">:</span><span class="n">date</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_clear_bindings</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_reset</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_close</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">datesArray</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We will use it to replace standard parsing method like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="nl">datesFromNSDateFormatter</span><span class="p">:[</span><span class="bp">NSDate</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="n">string</span> <span class="k">in</span> <span class="n">stringsArray</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">datesFromNSDateFormatter</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">NSDateFormatter</span><span class="p">.</span><span class="n">dateFromISOString</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I did some measurements using iPhone 5S with iOS8.2 in release configuration running exactly same amount of data (One Milion strings with ISO8601 date)</p>
+
+<p>And here are the results:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">NSDateFromatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">73.7988719940186</span> <span class="n">s</span>
+</span><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">SQLDateFormatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">8.51147103309631</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So using SQL to format string into date is pretty fast but acutally slower than objC version (But still at least 10time faster than regular method) So what about Swift?. Nothing really changed, overall results show faster computation but I&rsquo;m using better CPU so <code>NSDateFormatter</code> is still very very slow&hellip; If you like it, sample source code is available on <a href="https://github.com/noxytrux/DateFormatter">Github</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/03/law-of-demeter/">Law of Demeter</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-03T13:24:06+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>You may haven&rsquo;t heard about this law or if you have, you may have wondered <a href="http://homepages.cwi.nl/~storm/teaching/reader/LieberherrHolland89.pdf">who&rsquo;s this Demeter guy</a>. Regardless of it, the Law Of Demeter (LoD) is a foundation concept that&rsquo;s used among several design patterns, to wit: Delegate, Proxy, Façade, Adapter and Decorator. Therefore, you probably are already taking advantage of this Law, knowing it or not.</p>
+
+<p>There&rsquo;s a particular situation that occurs with iOS, that&rsquo;s perfect for applying the LoD. Sometimes it&rsquo;s needed to call method in our <code>UIApplicationDelegate</code>. The common way of doing that is the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">sharedApplication</span> <span class="o">=</span> <span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">()</span>
+</span><span class='line'><span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">sharedApplication</span><span class="p">.</span><span class="n">delegate</span>
+</span><span class='line'><span class="k">if</span> <span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">delegate</span> <span class="kt">as</span><span class="o">?</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">delegate</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There are too many temporary objects, and presumably, there&rsquo;s no reason why this class should know about <code>AppDelegate</code> casting and so on.</p>
+
+<p>Using the <code>Decorator</code> pattern, is a way to wrap up this logic and decouple stuff.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">myDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">delegate</span> <span class="kt">as</span><span class="o">!</span> <span class="n">AppDelegate</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">myDelegate</span><span class="p">().</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">extension</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">UIApplication</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now the class would just call <code>UIApplication.doSomething()</code> or <code>AppDelegate.doSomething()</code>.</p>
+
+<p>Another situation that&rsquo;s a claimer for LoD is when you have chained &lsquo;get&rsquo; statements, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">myDesire</span> <span class="o">=</span> <span class="n">Metallica</span><span class="p">().</span><span class="n">gimmeFuel</span><span class="p">().</span><span class="n">gimmeFire</span><span class="p">().</span><span class="n">gimmeThatWhichIDesire</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In such a case, the <code>Metallica</code> class should be refactored and provide it with a mean of calling <code>Metallica().gimmeThatWhichIDesire()</code>, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">class</span> <span class="n">Metallica</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">func</span> <span class="n">fuelSetOnFire</span><span class="p">(</span><span class="nl">fuel</span><span class="p">:</span> <span class="n">Fuel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fire</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">Fire</span><span class="p">.</span><span class="n">setFuelOnFire</span><span class="p">(</span><span class="n">fuel</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">gimmeThatWhichIDesire</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Desire</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">Desire</span><span class="p">.</span><span class="n">fromFire</span><span class="p">(</span><span class="n">fuelSetOnFire</span><span class="p">(</span><span class="n">metallicasFuel</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Wrapping up method calls, separating concerns and decoupling classes are the spine of LoD. Some can say that objects become more complex, but one thing is for sure, your software components will be more testable, and that is a big win!</p>
+
+<p>Now go ahead and follow the rule!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/23/run-script-phase-reporting/">Run Script Phase Reporting</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-23T13:24:06+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Bash scripts are commonly used in Mac/iOS development to make repetitive operations hands-free. However sometimes things go wrong and in a perfect world I’d like to be properly informed about the errors.
+Here comes view called „Report Navigator”, which displays any type of errors, warnings at compile time of Objective-C/Swift, or even while typing new lines of code. Let me show how to use the Report Navigator.</p>
+
+<p>As usual create new <code>Run Script Phase</code> and insert your Bash script:</p>
+
+<p><img class="center" src="/images/bash-scripts-marks/bash-scripts-new-script-phase.png"></p>
+
+<p>To keep this blog post short, I&rsquo;ve created a simple script that checks which build configurations were used:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">echo</span> <span class="s2">&quot;note: Starting script phase.”</span>
+</span><span class='line'><span class="s2">echo &quot;</span>warning: testing <span class="k">for</span> Debug target<span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">if [ &quot;</span>Debug<span class="s2">&quot;= &quot;</span><span class="k">${</span><span class="nv">CONFIGURATION</span><span class="k">}</span><span class="s2">&quot; ];</span>
+</span><span class='line'><span class="s2">then</span>
+</span><span class='line'><span class="s2">    echo &quot;</span>error: please run this script on Release target<span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">else</span>
+</span><span class='line'><span class="s2">    echo &quot;</span>warning: running on Debug target<span class="err">&quot;</span>
+</span><span class='line'><span class="k">fi</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Please, take a look in every echo at <code>note:</code>, <code>warning:</code> and <code>error:</code> prefixes. When XCode recognizes any of these tags, the proper indicator will show up in Report Navigator and of course at the top bar:</p>
+
+<p><img class="center" src="/images/bash-scripts-marks/bash-scripts-error-navigator.png"></p>
+
+<p>Pay attention to the colon at the end of each tag. Tags can be placed anywhere in the message.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/16/uicollectionviews-now-have-easy-reordering/">UICollectionViews Now Have Easy Reordering</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-16T01:30:09+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;m a huge fan of <code>UICollectionView</code>. It&rsquo;s way more customizable than his older brother <code>UITableView</code>. Nowadays I use collection view even more often than table view. With iOS 9 it supports easy reordering. Before it wasn&rsquo;t possible out of the box, and to do so means painful work. Let&rsquo;s have look at the API. You can find the accompanying Xcode project <a href="https://github.com/nshintio/uicollectionview-reordering">on GitHub</a>.</p>
+
+<p>The easiest way to add easy reordering is to use <code>UICollectionViewController</code>. It now has a new property called <code>installsStandardGestureForInteractiveMovement</code> which adds standard gestures to reorder cells. This property is <code>true</code> by default, which means that there&rsquo;s only one method we should to override to get things working.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="kr">override</span> <span class="k">func</span> <span class="nf">collectionView</span><span class="p">(</span><span class="nl">collectionView</span><span class="p">:</span> <span class="bp">UICollectionView</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">moveItemAtIndexPath</span> <span class="nl">sourceIndexPath</span><span class="p">:</span> <span class="bp">NSIndexPath</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">toIndexPath</span> <span class="nl">destinationIndexPath</span><span class="p">:</span> <span class="bp">NSIndexPath</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// move your data order</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The collection view infers that items can be moved because <code>moveItemAtIndexPath</code> is overrired.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/1.gif"></p>
+
+<p>Things go complicated when we want to use a simple <code>UIViewController</code> with collection view. We also need to implement <code>UICollectionViewDataSource</code> methods mentioned above, but we need to rewrite <code>installsStandardGestureForInteractiveMovement</code>. No worries, it&rsquo;s also easily supported.<code>UILongPressGestureRecognizer</code> is a continuous gesture recognizer and fully supports panning.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="kr">override</span> <span class="k">func</span> <span class="nf">viewDidLoad</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nb">super</span><span class="p">.</span><span class="n">viewDidLoad</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="n">longPressGesture</span> <span class="o">=</span> <span class="bp">UILongPressGestureRecognizer</span><span class="p">(</span><span class="nl">target</span><span class="p">:</span> <span class="nb">self</span><span class="p">,</span> <span class="nl">action</span><span class="p">:</span> <span class="s">&quot;handleLongGesture:&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">.</span><span class="n">addGestureRecognizer</span><span class="p">(</span><span class="n">longPressGesture</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="nf">handleLongGesture</span><span class="p">(</span><span class="nl">gesture</span><span class="p">:</span> <span class="bp">UILongPressGestureRecognizer</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">switch</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Began</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">guard</span> <span class="k">let</span> <span class="n">selectedIndexPath</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">.</span><span class="n">indexPathForItemAtPoint</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">locationInView</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="p">))</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">break</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">beginInteractiveMovementForItemAtIndexPath</span><span class="p">(</span><span class="n">selectedIndexPath</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Changed</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">updateInteractiveMovementTargetPosition</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">locationInView</span><span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">view</span><span class="o">!</span><span class="p">))</span>
+</span><span class='line'>        <span class="k">case</span> <span class="n">UIGestureRecognizerState</span><span class="p">.</span><span class="nl">Ended</span><span class="p">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">endInteractiveMovement</span><span class="p">()</span>
+</span><span class='line'>        <span class="k">default</span><span class="o">:</span>
+</span><span class='line'>            <span class="n">collectionView</span><span class="p">.</span><span class="n">cancelInteractiveMovement</span><span class="p">()</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We stored selected index path obtained in long press gesture handler and depending on wether it has any value we allow to pan gesture to kick in. Then, we call some new collection view methods accordingly to the gesture state:</p>
+
+<ul>
+<li><code>beginInteractiveMovementForItemAtIndexPath(indexPath: NSIndexPath)</code> which starts interactive movement for cell at specific index path</li>
+<li><code>updateInteractiveMovementTargetPosition(targetPosition: CGPoint)</code> which updates interactive movement target position during gesture</li>
+<li><code>endInteractiveMovement()</code> which ends interactive movement after you finish pan gesture</li>
+<li><code>cancelInteractiveMovement()</code> which cancels interactive movement</li>
+</ul>
+
+
+<p>And this makes handling pan gesture obvious.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/2.gif"></p>
+
+<p>The behavior is the same as with standard <code>UICollectionViewController</code>. Really cool, but what makes it even cooler is that we can apply reordering to collection view with our custom collection view layout. Check interactive movement with simple waterfall layout.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/3.gif"></p>
+
+<p>Uhm, looks cool, but what if we don&rsquo;t want to change cell size during movement? Selected cell size during interactive movement should remain the same. This is possible. <code>UICollectionViewLayout</code> also gets additional methods to handle reordering.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">func</span> <span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="nl">targetIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="n">withTargetPosition</span> <span class="nl">targetPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">,</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">func</span> <span class="n">invalidationContextForEndingInteractiveMovementOfItemsToFinalIndexPaths</span><span class="p">(</span><span class="nl">indexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">movementCancelled</span><span class="p">:</span> <span class="n">Bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The former is called during the cells interactive movement with target and previous cell&rsquo;s indexPaths. The next one is similar, but it&rsquo;s called just after interactive movement ends. With this knowledge we can achieve our requirement using one little trick.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">internal</span> <span class="kr">override</span> <span class="k">func</span> <span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="nl">targetIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="n">withTargetPosition</span> <span class="nl">targetPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">,</span>
+</span><span class='line'>    <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="p">[</span><span class="bp">NSIndexPath</span><span class="p">],</span>
+</span><span class='line'>    <span class="nl">previousPosition</span><span class="p">:</span> <span class="bp">CGPoint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">UICollectionViewLayoutInvalidationContext</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">var</span> <span class="n">context</span> <span class="o">=</span> <span class="nb">super</span><span class="p">.</span><span class="n">invalidationContextForInteractivelyMovingItems</span><span class="p">(</span><span class="n">targetIndexPaths</span><span class="p">,</span>
+</span><span class='line'>        <span class="nl">withTargetPosition</span><span class="p">:</span> <span class="n">targetPosition</span><span class="p">,</span> <span class="nl">previousIndexPaths</span><span class="p">:</span> <span class="n">previousIndexPaths</span><span class="p">,</span>
+</span><span class='line'>        <span class="nl">previousPosition</span><span class="p">:</span> <span class="n">previousPosition</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">self</span><span class="p">.</span><span class="n">delegate</span><span class="o">?</span><span class="p">.</span><span class="n">collectionView</span><span class="o">!</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">collectionView</span><span class="o">!</span><span class="p">,</span> <span class="nl">moveItemAtIndexPath</span><span class="p">:</span> <span class="n">previousIndexPaths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+</span><span class='line'>        <span class="nl">toIndexPath</span><span class="p">:</span> <span class="n">targetIndexPaths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">context</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Solution is straightforward. Grab previous and target index paths of currently moving cell. Then call <code>UICollectionViewDataSource</code> method to move this items around.</p>
+
+<p><img class="center" src="/images/uicollectionview-reordering/4.gif"></p>
+
+<p>Without a doubt, a collection view reordering is a fantastic addition. UIKit engineers made awesome job! :)</p>
+
+<p>P.S: I would like to thanks <a href="https://twitter.com/qdoug">Douglas Hill</a> for hinting out some improvements in our code. Thanks Douglas, keep up the good work!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/posts/2">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/09/23/uitraitcollection-trick/">UITraitCollection trick</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/dont-forget-about-uimotioneffects/">Don't forget about UIMottionEffect</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/17/autolayout-breakpoints/">Autolayout breakpoints</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 -  NSHint <br/>
+</span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
