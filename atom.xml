@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-09-13T22:57:50+02:00</updated>
+  <updated>2015-10-07T22:44:55+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,209 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[Easy cast with _ObjectiveCBridgeable]]></title>
+    <link href="http://nshint.io/blog/2015/10/07/easy-cast-with-_ObjectiveCBridgeable/"/>
+    
+    <updated>2015-10-07T19:15:43+02:00</updated>
+    <id>http://nshint.io/blog/2015/10/07/easy-cast-with-_ObjectiveCBridgeable</id>
+    
+    <content type="html"><![CDATA[<p>Swift is out there for about a year and it&rsquo;s a great programming language. I think that almost every iOS/OSX developer out there has already written couple of things in Swift (if you haven&rsquo;t, go ahead and try, you won&rsquo;t regret it, I promise). Although, we have many years of libs and frameworks built using Objective-C and sooner or later a project may have both Swift and Objective-C working together.</p>
+
+<p>Fortunately, Apple gave us a <a href="https://itunes.apple.com/us/book/using-swift-cocoa-objective/id888894773?mt=11">book</a> and a couple of WWDC session (<a href="https://developer.apple.com/videos/play/wwdc2014-406/">here</a> and <a href="https://developer.apple.com/videos/play/wwdc2015-401/">here</a>) with the intent to help developers on this task.</p>
+
+<p>For those who have some experience with this integration knows that casting plays an important role. So, todays hint will dig into an poor documented protocol called <code>_ObjectiveCBridgeable</code>.</p>
+
+<p>The documentation, which is only founded in header files says:</p>
+
+<blockquote><p>A Swift Array or Dictionary of types conforming to <em>ObjectiveCBridgeable can be passed to Objective-C as an NSArray or NSDictionary, respectively. The elements of the resulting NSArray or NSDictionary will be the result of calling </em>bridgeToObjectiveC on each element of the source container.</p></blockquote>
+
+<p>Ok, but there is something else you can do with that, which is very handy.</p>
+
+<p>Suppose that you have this class in Objective-C:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="k">@interface</span> <span class="nc">OPerson</span>: <span class="bp">NSObject</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">-</span> <span class="p">(</span><span class="kt">instancetype</span><span class="p">)</span><span class="nf">initWithName:</span><span class="p">(</span><span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">name</span> <span class="nf">surname:</span><span class="p">(</span><span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="nv">surname</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">copy</span><span class="p">)</span> <span class="p">(</span><span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">name</span><span class="p">;</span>
+</span><span class='line'><span class="k">@property</span> <span class="p">(</span><span class="k">nonatomic</span><span class="p">,</span> <span class="k">copy</span><span class="p">)</span> <span class="p">(</span><span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">surname</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">@end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now you want to easily cast this class into a Swift struct. Yes, we can! All you have to do is conform to <code>_ObjectiveCBridgeable</code>, like so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">struct</span> <span class="n">Person</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">let</span> <span class="nl">name</span><span class="p">:</span> <span class="n">String</span>
+</span><span class='line'>        <span class="k">let</span> <span class="nl">surname</span><span class="p">:</span> <span class="n">String</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">extension</span> <span class="nl">Person</span><span class="p">:</span> <span class="n">_ObjectiveCBridgeable</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">typealias</span> <span class="n">_ObjectiveCType</span> <span class="o">=</span> <span class="n">OPerson</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">static</span> <span class="k">func</span> <span class="n">_isBridgedToObjectiveC</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Bool</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">type</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">static</span> <span class="k">func</span> <span class="n">_getObjectiveCType</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">.</span><span class="kt">Type</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">ObjectiveCType</span><span class="p">.</span><span class="nb">self</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">_bridgeToObjectiveC</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">_ObjectiveCType</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">OPerson</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="nl">surname</span><span class="p">:</span> <span class="n">surname</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">static</span> <span class="k">func</span> <span class="n">_forceBridgeFromObjectiveC</span><span class="p">(</span><span class="nl">source</span><span class="p">:</span> <span class="n">_ObjectiveCType</span><span class="p">,</span> <span class="k">inout</span> <span class="nl">result</span><span class="p">:</span> <span class="n">Person</span><span class="o">?</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">result</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="n">source</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="nl">surname</span><span class="p">:</span> <span class="n">source</span><span class="p">.</span><span class="n">name</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">static</span> <span class="k">func</span> <span class="n">_conditionallyBridgeFRomObjectiveC</span><span class="p">(</span><span class="nl">source</span><span class="p">:</span> <span class="n">_ObjectiveCType</span><span class="p">,</span> <span class="k">inout</span> <span class="nl">result</span><span class="p">:</span> <span class="n">Person</span><span class="o">?</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Bool</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">_forceBridgeFromObjectiveC</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nl">result</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">result</span><span class="p">)</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nb">true</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And voilá!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">objcPerson</span> <span class="o">=</span> <span class="n">OPerson</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="s">&quot;John&quot;</span><span class="p">,</span> <span class="nl">surname</span><span class="p">:</span> <span class="s">&quot;Doe&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="k">let</span> <span class="n">swiftPerson</span> <span class="o">=</span> <span class="n">objcPerson</span> <span class="kt">as</span><span class="o">?</span> <span class="n">Person</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">//will work</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">swiftPerson</span> <span class="o">=</span> <span class="n">objcPerson</span> <span class="kt">as</span> <span class="n">Person</span> <span class="c1">//this too!</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">swiftPerson2</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="s">&quot;Jack&quot;</span><span class="p">,</span> <span class="nl">surname</span><span class="p">:</span><span class="s">&quot;Doe&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">let</span> <span class="n">objcPerson</span> <span class="o">=</span> <span class="n">swiftPerson2</span> <span class="kt">as</span> <span class="n">OPerson</span> <span class="c1">//and that</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="nl">person</span><span class="p">:</span> <span class="n">OPerson</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="nl">name</span><span class="p">:</span> <span class="s">&quot;Alfred&quot;</span><span class="p">,</span> <span class="nl">surname</span><span class="p">:</span> <span class="s">&quot;Doe&quot;</span><span class="p">)</span> <span class="c1">//hooray</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Oh, that&rsquo;s so beautiful, don&rsquo;t you think? :]</p>
+]]></content>
+    
+  </entry>
+  
+  <entry>
+    
+    <title type="html"><![CDATA[UITraitCollection trick]]></title>
+    <link href="http://nshint.io/blog/2015/09/23/uitraitcollection-trick/"/>
+    
+    <updated>2015-09-23T19:15:43+02:00</updated>
+    <id>http://nshint.io/blog/2015/09/23/uitraitcollection-trick</id>
+    
+    <content type="html"><![CDATA[<p>Gone are the days where there was just one iPhone for developers as a target. Now we have to support multiple devices with different screen sizes. Fortunately, we have autolayout, which solves a part of this design equation, the other part is solved with <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UITraitCollection_ClassReference/"><code>UITraitCollection</code></a>. Trait collection object has two size classes: horizontal and vertical. Each of these classes has three possible values: compact, regular or any. The current device+orientation can be described as a combination of the sizes.</p>
+
+<p><img class="center" src="http://nshint.io/images/uitraitcollection_trick/1.png"></p>
+
+<p>The best thing is that storyboards and nib files support these size classes. We can make layout changes directly onto them. Every view or auto-layout constraint can exist in one or several other size classes. So it is possible to support multiple devices and orientations without any code. Nevertheless there is a case, which is not covered at all. Imagine that you support only portrait mode and the designer wishes to make a difference between iPhone 5 and iPhone 6+ screen. In this case, size classes are not much helpful. However, we can leverage them in an unusual way.</p>
+
+<p><code>UITraitEnvironment</code> is a protocol which provides access to trait collection. Its conformed by most of the objects in view hierarchy: <code>UIScreen</code>, <code>UIWindow</code>, <code>UIViewController</code>, <code>UIView</code>. Every child inherits the trait collection object from its parent. The trick is to override the trait collection in <code>UIWindow</code> and return a custom value for iPhone 6+ device. Take a look:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="p">@</span><span class="n">objc</span> <span class="n">public</span> <span class="k">class</span> <span class="nl">Window</span><span class="p">:</span> <span class="bp">UIWindow</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kr">override</span> <span class="n">public</span> <span class="k">var</span> <span class="nl">traitCollection</span><span class="p">:</span> <span class="n">UITraitCollection</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="n">DeviceType</span><span class="p">.</span><span class="n">isIPhone6P</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">var</span> <span class="n">collections</span> <span class="o">=</span> <span class="p">[</span><span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">horizontalSizeClass</span><span class="p">:</span> <span class="p">.</span><span class="n">Compact</span><span class="p">),</span>
+</span><span class='line'>                <span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">verticalSizeClass</span><span class="p">:</span> <span class="p">.</span><span class="n">Compact</span><span class="p">)]</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span> <span class="n">UITraitCollection</span><span class="p">(</span><span class="nl">traitsFromCollections</span><span class="p">:</span> <span class="n">collections</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">super</span><span class="p">.</span><span class="n">traitCollection</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We override trait collection in <code>UIWindow</code> just for iPhone 6+ model. Now we can make layout changes in storyboard directly for this model by changing size class selectors at the bottom of Interface Builder pane. Trait collection with horizontal compact class and vertical compact class is reserved for iPhone 6+.</p>
+
+<p><img class="center" src="http://nshint.io/images/uitraitcollection_trick/2.png"></p>
+
+<p>We can install additional views and change layout constraints only for iPhone 6+.</p>
+
+<p><img class="center" src="http://nshint.io/images/uitraitcollection_trick/3.png"><br/>
+<img class="center" src="http://nshint.io/images/uitraitcollection_trick/4.png"></p>
+
+<p>Tell your designer about that cool hint and you will probably get some treats. The project shown above can be found on <a href="https://github.com/nshintio/uitraitcollection-trick">GitHub</a>.</p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
