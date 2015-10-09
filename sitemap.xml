@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://nshint.io/blog/2015/10/08/bluetooth-low-energy-the-fun-way/</loc>
+    <lastmod>2015-10-08T18:17:28+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://nshint.io/blog/2015/10/07/easy-cast-with-_ObjectiveCBridgeable/</loc>
     <lastmod>2015-10-07T19:15:43+02:00</lastmod>
   </url>
@@ -84,8 +88,5 @@
   </url>
   <url>
     <loc>http://nshint.io/blog/archives/</loc>
-  </url>
-  <url>
-    <loc>http://nshint.io/posts/2/</loc>
   </url>
 </urlset>
