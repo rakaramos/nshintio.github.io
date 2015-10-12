@@ -9,7 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Today Bluetooth Low Energy can be found in many cool applications, it can be used from simple data exchange to payment terminals and the more popular &hellip;">
+  <meta name="description" content="Swift like objC allow us to mix it with other languages, unfotunately when it comes to Swift we can only choose between our good old friend objC or &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,221 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/10/10/working-with-cfunction-pointers-in-swift/">Working With CFunction Pointers in Swift</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-10T11:03:46+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Swift like objC allow us to mix it with other languages, unfotunately when it comes to Swift we can only choose between our good old friend objC or ANIS C, as there is still lack of C++ support. Basically using function pointers allows us to call C functions inside Swift. Swift will automatically convert methods included in Bridge Header into Swift equivalents:</p>
+
+<p>This code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="kt">void</span> <span class="nf">InitializeAudioSource</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">userAudioClass</span><span class="p">);</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">PlayAudio</span><span class="p">();</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">SetAudioGain</span><span class="p">(</span><span class="n">Float32</span> <span class="n">gain</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Will be converted into:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="n">Void</span> <span class="n">InitializeAudioSource</span><span class="p">(</span><span class="nl">userAudioClass</span><span class="p">:</span> <span class="n">UnsafeMutablePointer</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="p">)</span>
+</span><span class='line'><span class="n">Void</span> <span class="n">PlayAudio</span><span class="p">(</span><span class="n">Void</span><span class="p">)</span>
+</span><span class='line'><span class="n">Void</span> <span class="n">SetAudioGain</span><span class="p">(</span><span class="nl">gain</span><span class="p">:</span><span class="n">Float32</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And as far this is all pretty straightforward so now having our C CoreAudio implementation we can use it in our Swift project like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="k">class</span> <span class="nl">KWSBackgroundStreamPlayer</span><span class="p">:</span> <span class="bp">NSObject</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">setGain</span><span class="p">(</span><span class="nl">gain</span> <span class="p">:</span> <span class="n">Float32</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">SetAudioGain</span><span class="p">(</span><span class="n">gain</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">play</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">PlayAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">pause</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">PauseAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">close</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="nb">self</span><span class="p">.</span><span class="n">trackClosed</span> <span class="o">==</span> <span class="nb">true</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">trackClosed</span> <span class="o">=</span> <span class="nb">true</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">CloseAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">deinit</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But because Swift is very strict when it comes to type checks we are no more able to pass our class to <code>InitializeAudioSource</code> function, if you try to do so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="n">InitializeAudioSource</span><span class="p">(</span> <span class="o">&amp;</span><span class="nb">self</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You will end up with this error:</p>
+
+<p><img class="center" src="/images/cfunction_pointers/error_cfunction.png"></p>
+
+<p>And this is were the bad hacks come in. Unfotunately we need to get a &ldquo;true&rdquo; raw pointer to be able to pass it back to C code and to so we need this piece of code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="c1">//convert self to unmanaged object</span>
+</span><span class='line'><span class="k">let</span> <span class="n">anUnmanaged</span> <span class="o">=</span> <span class="n">Unmanaged</span><span class="o">&lt;</span><span class="n">KWSBackgroundStreamPlayer</span><span class="o">&gt;</span><span class="p">.</span><span class="n">passUnretained</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'><span class="c1">//get raw data pointer</span>
+</span><span class='line'><span class="k">let</span> <span class="nl">opaque</span><span class="p">:</span> <span class="n">COpaquePointer</span> <span class="o">=</span> <span class="n">anUnmanaged</span><span class="p">.</span><span class="n">toOpaque</span><span class="p">()</span>
+</span><span class='line'><span class="c1">//convert to Mutable to match Swift safe type check</span>
+</span><span class='line'><span class="k">let</span> <span class="n">voidSelf</span> <span class="o">=</span> <span class="n">UnsafeMutablePointer</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="p">(</span><span class="n">opaque</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">InitializeAudioSource</span><span class="p">(</span> <span class="n">voidSelf</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s how you pass Swift classes and objects to C code, and you will need to do it every time you need a void or any other fancy pointer on C side.</p>
+
+<p>What happens here is that we first take an <code>Unmanaged</code> version of our class object this tells compiler that we are now responsible for memory management, and stops doing retain release magic under the hood for us. But still this is not enough, now we need a raw memory pointer from that unmanaged object and thats where <code>toOpaque()</code> comes in. This will return an raw C pointer of our class object. This is the true <code>void *</code> pointer.
+<code>COpaquePointer</code> is memory representation of something that cannot be represented in Swift so you should be very careful when playing with this kind of pointers. Now we just need to make it a proper type in this case <code>UnsafeMutablePointer</code> with <code>&lt;Void&gt;</code> class type. Every UnsafePointer have constructor that takes <code>COpaquePointer</code> so you have to be sure you are choosing proper type when creating it as there is no type check at this point!</p>
+
+<p>Hopefully on C side it&rsquo;s easy to convert void pointer to proper class type, you just need to use <code>bridge</code> to do so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="kt">void</span> <span class="nf">InitializeAudioSource</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">userAudioClass</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">//bridge it back to our class </span>
+</span><span class='line'>    <span class="n">KWSBackgroundStreamPlayer</span> <span class="o">*</span><span class="n">backgroundPlayer</span> <span class="o">=</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">KWSBackgroundStreamPlayer</span><span class="o">*</span><span class="p">)</span><span class="n">userAudioClass</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//get some properties</span>
+</span><span class='line'>    <span class="n">NSString</span> <span class="o">*</span><span class="n">path</span> <span class="o">=</span> <span class="n">backgroundPlayer</span><span class="p">.</span><span class="n">filePath</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">repeatSong</span> <span class="o">=</span> <span class="n">backgroundPlayer</span><span class="p">.</span><span class="n">repeatSong</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//...    </span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//we can even pass it as parameter with proper pointer type</span>
+</span><span class='line'>    <span class="n">OSStatus</span> <span class="n">result</span> <span class="o">=</span> <span class="n">AudioQueueNewOutput</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dataFormat</span><span class="p">,</span> <span class="n">BufferCallback</span><span class="p">,</span> <span class="p">(</span><span class="n">__bridge</span> <span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="n">backgroundPlayer</span><span class="p">),</span> <span class="n">nil</span><span class="p">,</span> <span class="n">nil</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">queue</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//... </span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I hope this will help people understand a bit more about how danger may be playing with C in Swift and vice versa. Using <code>Unmanaged</code> and <code>COpaquePointer</code> may lead to crashes and memory leaks, as in some cases you are again responsible for manual memory managment, you are able to get raw pointers with no type that can be casted to whatever you want and so on.</p>
+
+<p>Overall this is a powerful magic you can do in Swift but as someone said: &ldquo;With Great Power Comes Great Responsibility&rdquo; ;)</p>
+
+<p>Example usage available on <a href="https://github.com/noxytrux/KnightWhoSaidSwift">github</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1405,130 +1620,6 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2015/08/03/law-of-demeter/">Law of Demeter</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-08-03T13:24:06+02:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>You may haven&rsquo;t heard about this law or if you have, you may have wondered <a href="http://homepages.cwi.nl/~storm/teaching/reader/LieberherrHolland89.pdf">who&rsquo;s this Demeter guy</a>. Regardless of it, the Law Of Demeter (LoD) is a foundation concept that&rsquo;s used among several design patterns, to wit: Delegate, Proxy, Façade, Adapter and Decorator. Therefore, you probably are already taking advantage of this Law, knowing it or not.</p>
-
-<p>There&rsquo;s a particular situation that occurs with iOS, that&rsquo;s perfect for applying the LoD. Sometimes it&rsquo;s needed to call method in our <code>UIApplicationDelegate</code>. The common way of doing that is the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">sharedApplication</span> <span class="o">=</span> <span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">()</span>
-</span><span class='line'><span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">sharedApplication</span><span class="p">.</span><span class="n">delegate</span>
-</span><span class='line'><span class="k">if</span> <span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">delegate</span> <span class="kt">as</span><span class="o">?</span> <span class="n">AppDelegate</span> <span class="p">{</span>
-</span><span class='line'>    <span class="n">delegate</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>There are too many temporary objects, and presumably, there&rsquo;s no reason why this class should know about <code>AppDelegate</code> casting and so on.</p>
-
-<p>Using the <code>Decorator</code> pattern, is a way to wrap up this logic and decouple stuff.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">myDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AppDelegate</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">delegate</span> <span class="kt">as</span><span class="o">!</span> <span class="n">AppDelegate</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">myDelegate</span><span class="p">().</span><span class="n">doSomething</span><span class="p">()</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="n">AppDelegate</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="bp">UIApplication</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now the class would just call <code>UIApplication.doSomething()</code> or <code>AppDelegate.doSomething()</code>.</p>
-
-<p>Another situation that&rsquo;s a claimer for LoD is when you have chained &lsquo;get&rsquo; statements, for example:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">myDesire</span> <span class="o">=</span> <span class="n">Metallica</span><span class="p">().</span><span class="n">gimmeFuel</span><span class="p">().</span><span class="n">gimmeFire</span><span class="p">().</span><span class="n">gimmeThatWhichIDesire</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>In such a case, the <code>Metallica</code> class should be refactored and provide it with a mean of calling <code>Metallica().gimmeThatWhichIDesire()</code>, for example:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">class</span> <span class="n">Metallica</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">func</span> <span class="n">fuelSetOnFire</span><span class="p">(</span><span class="nl">fuel</span><span class="p">:</span> <span class="n">Fuel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fire</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="n">Fire</span><span class="p">.</span><span class="n">setFuelOnFire</span><span class="p">(</span><span class="n">fuel</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">func</span> <span class="n">gimmeThatWhichIDesire</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Desire</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="n">Desire</span><span class="p">.</span><span class="n">fromFire</span><span class="p">(</span><span class="n">fuelSetOnFire</span><span class="p">(</span><span class="n">metallicasFuel</span><span class="p">))</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Wrapping up method calls, separating concerns and decoupling classes are the spine of LoD. Some can say that objects become more complex, but one thing is for sure, your software components will be more testable, and that is a big win!</p>
-
-<p>Now go ahead and follow the rule!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1544,6 +1635,10 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/10/working-with-cfunction-pointers-in-swift/">Working with CFunction pointers in Swift</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/08/bluetooth-low-energy-the-fun-way/">Bluetooth low energy the fun way</a>
       </li>
     
@@ -1557,10 +1652,6 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
     
       <li class="post">
         <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
       </li>
     
   </ul>

@@ -9,7 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="Bash scripts are commonly used in Mac/iOS development to make repetitive operations hands-free. However sometimes things go wrong and in a perfect &hellip;">
+  <meta name="description" content="You may haven&rsquo;t heard about this law or if you have, you may have wondered who&rsquo;s this Demeter guy. Regardless of it, the Law Of Demeter ( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,130 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/03/law-of-demeter/">Law of Demeter</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-03T13:24:06+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>You may haven&rsquo;t heard about this law or if you have, you may have wondered <a href="http://homepages.cwi.nl/~storm/teaching/reader/LieberherrHolland89.pdf">who&rsquo;s this Demeter guy</a>. Regardless of it, the Law Of Demeter (LoD) is a foundation concept that&rsquo;s used among several design patterns, to wit: Delegate, Proxy, Façade, Adapter and Decorator. Therefore, you probably are already taking advantage of this Law, knowing it or not.</p>
+
+<p>There&rsquo;s a particular situation that occurs with iOS, that&rsquo;s perfect for applying the LoD. Sometimes it&rsquo;s needed to call method in our <code>UIApplicationDelegate</code>. The common way of doing that is the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">sharedApplication</span> <span class="o">=</span> <span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">()</span>
+</span><span class='line'><span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">sharedApplication</span><span class="p">.</span><span class="n">delegate</span>
+</span><span class='line'><span class="k">if</span> <span class="k">let</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">delegate</span> <span class="kt">as</span><span class="o">?</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">delegate</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There are too many temporary objects, and presumably, there&rsquo;s no reason why this class should know about <code>AppDelegate</code> casting and so on.</p>
+
+<p>Using the <code>Decorator</code> pattern, is a way to wrap up this logic and decouple stuff.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">myDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">delegate</span> <span class="kt">as</span><span class="o">!</span> <span class="n">AppDelegate</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">myDelegate</span><span class="p">().</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">extension</span> <span class="n">AppDelegate</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">class</span> <span class="k">func</span> <span class="n">doSomething</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="bp">UIApplication</span><span class="p">.</span><span class="n">doSomething</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now the class would just call <code>UIApplication.doSomething()</code> or <code>AppDelegate.doSomething()</code>.</p>
+
+<p>Another situation that&rsquo;s a claimer for LoD is when you have chained &lsquo;get&rsquo; statements, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">myDesire</span> <span class="o">=</span> <span class="n">Metallica</span><span class="p">().</span><span class="n">gimmeFuel</span><span class="p">().</span><span class="n">gimmeFire</span><span class="p">().</span><span class="n">gimmeThatWhichIDesire</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In such a case, the <code>Metallica</code> class should be refactored and provide it with a mean of calling <code>Metallica().gimmeThatWhichIDesire()</code>, for example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">class</span> <span class="n">Metallica</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">func</span> <span class="n">fuelSetOnFire</span><span class="p">(</span><span class="nl">fuel</span><span class="p">:</span> <span class="n">Fuel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fire</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="n">Fire</span><span class="p">.</span><span class="n">setFuelOnFire</span><span class="p">(</span><span class="n">fuel</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">gimmeThatWhichIDesire</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Desire</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">Desire</span><span class="p">.</span><span class="n">fromFire</span><span class="p">(</span><span class="n">fuelSetOnFire</span><span class="p">(</span><span class="n">metallicasFuel</span><span class="p">))</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Wrapping up method calls, separating concerns and decoupling classes are the spine of LoD. Some can say that objects become more complex, but one thing is for sure, your software components will be more testable, and that is a big win!</p>
+
+<p>Now go ahead and follow the rule!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1109,97 +1233,9 @@ When this happens, we are usually presented with all the stack trace and in the 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/23/toggle-slow-animations/">Toggle Slow Animations</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-23T22:36:49+02:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>iOS Simulator has a feature that slows animations, you can toggle it either by pressing <code>⌘T</code> or choosing <code>Debug &gt; Toggle Slow Animations in Frontmost App</code>. It&rsquo;s very useful, but what if we want to do the same on device? It&rsquo;s easy, fast and simple.</p>
-
-<p><code>CALayer</code> has a property called <code>speed</code>, which is a time multiplier. This means that if we have an animation with a duration of 1 second, and set the layer&rsquo;s speed to 2, it&rsquo;ll take just 0.5 seconds to finish. The best thing about it is that it&rsquo;s related to the parent layer. So when we change the speed of a particular <code>CALayer</code>, every child layer will be affected. So, if we change <code>UIWindow</code> layer speed, every <code>CALayer</code> in our application will perform animations with that custom speed value. That leaves us with this two extensions:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIWindow</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">var</span> <span class="nl">slowAnimationsEnabled</span><span class="p">:</span> <span class="n">Bool</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">layer</span><span class="p">.</span><span class="n">speed</span> <span class="o">!=</span> <span class="mi">1</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="n">layer</span><span class="p">.</span><span class="n">speed</span> <span class="o">=</span> <span class="n">newValue</span> <span class="o">?</span> <span class="mf">0.2</span> <span class="o">:</span> <span class="mi">1</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">func</span> <span class="n">setSlowAnimationsEnabled</span><span class="p">(</span><span class="nl">enabled</span><span class="p">:</span> <span class="n">Bool</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">windows</span><span class="p">.</span><span class="n">map</span><span class="p">({</span> <span class="n">window</span> <span class="k">in</span> <span class="p">(</span><span class="n">window</span> <span class="kt">as</span><span class="o">?</span> <span class="bp">UIWindow</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="n">slowAnimationsEnabled</span> <span class="o">=</span> <span class="n">enabled</span> <span class="p">})</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And you can call it in both ways:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">keyWindow</span><span class="o">?</span><span class="p">.</span><span class="n">slowAnimationsEnabled</span> <span class="o">=</span> <span class="nb">true</span>
-</span><span class='line'><span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">setSlowAnimationsEnabled</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You can go further and expose this to your testers, through iOS Settings Bundle or a fancy shake gesture. Pretty handy!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/posts/3">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -1212,6 +1248,10 @@ When this happens, we are usually presented with all the stack trace and in the 
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/10/10/working-with-cfunction-pointers-in-swift/">Working with CFunction pointers in Swift</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/10/08/bluetooth-low-energy-the-fun-way/">Bluetooth low energy the fun way</a>
@@ -1227,10 +1267,6 @@ When this happens, we are usually presented with all the stack trace and in the 
     
       <li class="post">
         <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/02/autolayout-and-nslocalizedstring/">Autolayout and NSLocalizedString</a>
       </li>
     
   </ul>

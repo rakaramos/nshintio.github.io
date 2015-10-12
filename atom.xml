@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-10-09T23:15:58+02:00</updated>
+  <updated>2015-10-12T09:56:55+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,196 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[Working with CFunction pointers in Swift]]></title>
+    <link href="http://nshint.io/blog/2015/10/10/working-with-cfunction-pointers-in-swift/"/>
+    
+    <updated>2015-10-10T11:03:46+02:00</updated>
+    <id>http://nshint.io/blog/2015/10/10/working-with-cfunction-pointers-in-swift</id>
+    
+    <content type="html"><![CDATA[<p>Swift like objC allow us to mix it with other languages, unfotunately when it comes to Swift we can only choose between our good old friend objC or ANIS C, as there is still lack of C++ support. Basically using function pointers allows us to call C functions inside Swift. Swift will automatically convert methods included in Bridge Header into Swift equivalents:</p>
+
+<p>This code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="kt">void</span> <span class="nf">InitializeAudioSource</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">userAudioClass</span><span class="p">);</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">PlayAudio</span><span class="p">();</span>
+</span><span class='line'><span class="kt">void</span> <span class="nf">SetAudioGain</span><span class="p">(</span><span class="n">Float32</span> <span class="n">gain</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Will be converted into:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="n">Void</span> <span class="n">InitializeAudioSource</span><span class="p">(</span><span class="nl">userAudioClass</span><span class="p">:</span> <span class="n">UnsafeMutablePointer</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="p">)</span>
+</span><span class='line'><span class="n">Void</span> <span class="n">PlayAudio</span><span class="p">(</span><span class="n">Void</span><span class="p">)</span>
+</span><span class='line'><span class="n">Void</span> <span class="n">SetAudioGain</span><span class="p">(</span><span class="nl">gain</span><span class="p">:</span><span class="n">Float32</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And as far this is all pretty straightforward so now having our C CoreAudio implementation we can use it in our Swift project like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="k">class</span> <span class="nl">KWSBackgroundStreamPlayer</span><span class="p">:</span> <span class="bp">NSObject</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">setGain</span><span class="p">(</span><span class="nl">gain</span> <span class="p">:</span> <span class="n">Float32</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">SetAudioGain</span><span class="p">(</span><span class="n">gain</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">play</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">PlayAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">pause</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">PauseAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">close</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="nb">self</span><span class="p">.</span><span class="n">trackClosed</span> <span class="o">==</span> <span class="nb">true</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="k">return</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">trackClosed</span> <span class="o">=</span> <span class="nb">true</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">CloseAudio</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">deinit</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nb">self</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But because Swift is very strict when it comes to type checks we are no more able to pass our class to <code>InitializeAudioSource</code> function, if you try to do so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="n">InitializeAudioSource</span><span class="p">(</span> <span class="o">&amp;</span><span class="nb">self</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You will end up with this error:</p>
+
+<p><img class="center" src="http://nshint.io/images/cfunction_pointers/error_cfunction.png"></p>
+
+<p>And this is were the bad hacks come in. Unfotunately we need to get a &ldquo;true&rdquo; raw pointer to be able to pass it back to C code and to so we need this piece of code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='Swift'><span class='line'><span class="c1">//convert self to unmanaged object</span>
+</span><span class='line'><span class="k">let</span> <span class="n">anUnmanaged</span> <span class="o">=</span> <span class="n">Unmanaged</span><span class="o">&lt;</span><span class="n">KWSBackgroundStreamPlayer</span><span class="o">&gt;</span><span class="p">.</span><span class="n">passUnretained</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'><span class="c1">//get raw data pointer</span>
+</span><span class='line'><span class="k">let</span> <span class="nl">opaque</span><span class="p">:</span> <span class="n">COpaquePointer</span> <span class="o">=</span> <span class="n">anUnmanaged</span><span class="p">.</span><span class="n">toOpaque</span><span class="p">()</span>
+</span><span class='line'><span class="c1">//convert to Mutable to match Swift safe type check</span>
+</span><span class='line'><span class="k">let</span> <span class="n">voidSelf</span> <span class="o">=</span> <span class="n">UnsafeMutablePointer</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;</span><span class="p">(</span><span class="n">opaque</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">InitializeAudioSource</span><span class="p">(</span> <span class="n">voidSelf</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s how you pass Swift classes and objects to C code, and you will need to do it every time you need a void or any other fancy pointer on C side.</p>
+
+<p>What happens here is that we first take an <code>Unmanaged</code> version of our class object this tells compiler that we are now responsible for memory management, and stops doing retain release magic under the hood for us. But still this is not enough, now we need a raw memory pointer from that unmanaged object and thats where <code>toOpaque()</code> comes in. This will return an raw C pointer of our class object. This is the true <code>void *</code> pointer.
+<code>COpaquePointer</code> is memory representation of something that cannot be represented in Swift so you should be very careful when playing with this kind of pointers. Now we just need to make it a proper type in this case <code>UnsafeMutablePointer</code> with <code>&lt;Void&gt;</code> class type. Every UnsafePointer have constructor that takes <code>COpaquePointer</code> so you have to be sure you are choosing proper type when creating it as there is no type check at this point!</p>
+
+<p>Hopefully on C side it&rsquo;s easy to convert void pointer to proper class type, you just need to use <code>bridge</code> to do so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="kt">void</span> <span class="nf">InitializeAudioSource</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">userAudioClass</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="c1">//bridge it back to our class </span>
+</span><span class='line'>    <span class="n">KWSBackgroundStreamPlayer</span> <span class="o">*</span><span class="n">backgroundPlayer</span> <span class="o">=</span> <span class="p">(</span><span class="n">__bridge</span> <span class="n">KWSBackgroundStreamPlayer</span><span class="o">*</span><span class="p">)</span><span class="n">userAudioClass</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//get some properties</span>
+</span><span class='line'>    <span class="n">NSString</span> <span class="o">*</span><span class="n">path</span> <span class="o">=</span> <span class="n">backgroundPlayer</span><span class="p">.</span><span class="n">filePath</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">repeatSong</span> <span class="o">=</span> <span class="n">backgroundPlayer</span><span class="p">.</span><span class="n">repeatSong</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//...    </span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//we can even pass it as parameter with proper pointer type</span>
+</span><span class='line'>    <span class="n">OSStatus</span> <span class="n">result</span> <span class="o">=</span> <span class="n">AudioQueueNewOutput</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dataFormat</span><span class="p">,</span> <span class="n">BufferCallback</span><span class="p">,</span> <span class="p">(</span><span class="n">__bridge</span> <span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="n">backgroundPlayer</span><span class="p">),</span> <span class="n">nil</span><span class="p">,</span> <span class="n">nil</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">queue</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//... </span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I hope this will help people understand a bit more about how danger may be playing with C in Swift and vice versa. Using <code>Unmanaged</code> and <code>COpaquePointer</code> may lead to crashes and memory leaks, as in some cases you are again responsible for manual memory managment, you are able to get raw pointers with no type that can be casted to whatever you want and so on.</p>
+
+<p>Overall this is a powerful magic you can do in Swift but as someone said: &ldquo;With Great Power Comes Great Responsibility&rdquo; ;)</p>
+
+<p>Example usage available on <a href="https://github.com/noxytrux/KnightWhoSaidSwift">github</a></p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
@@ -2042,71 +2232,6 @@ When this happens, we are usually presented with all the stack trace and in the 
 <p><img class="center" src="http://nshint.io/images/detailed-exceptions/2.png"></p>
 
 <p>This way you get more detailed error description which tells you a lot more about the place that you should be looking for to find your mistake.</p>
-]]></content>
-    
-  </entry>
-  
-  <entry>
-    
-    <title type="html"><![CDATA[Toggle Slow Animations]]></title>
-    <link href="http://nshint.io/blog/2015/06/23/toggle-slow-animations/"/>
-    
-    <updated>2015-06-23T22:36:49+02:00</updated>
-    <id>http://nshint.io/blog/2015/06/23/toggle-slow-animations</id>
-    
-    <content type="html"><![CDATA[<p>iOS Simulator has a feature that slows animations, you can toggle it either by pressing <code>⌘T</code> or choosing <code>Debug &gt; Toggle Slow Animations in Frontmost App</code>. It&rsquo;s very useful, but what if we want to do the same on device? It&rsquo;s easy, fast and simple.</p>
-
-<p><code>CALayer</code> has a property called <code>speed</code>, which is a time multiplier. This means that if we have an animation with a duration of 1 second, and set the layer&rsquo;s speed to 2, it&rsquo;ll take just 0.5 seconds to finish. The best thing about it is that it&rsquo;s related to the parent layer. So when we change the speed of a particular <code>CALayer</code>, every child layer will be affected. So, if we change <code>UIWindow</code> layer speed, every <code>CALayer</code> in our application will perform animations with that custom speed value. That leaves us with this two extensions:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UIWindow</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">var</span> <span class="nl">slowAnimationsEnabled</span><span class="p">:</span> <span class="n">Bool</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span>
-</span><span class='line'>            <span class="k">return</span> <span class="n">layer</span><span class="p">.</span><span class="n">speed</span> <span class="o">!=</span> <span class="mi">1</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="n">layer</span><span class="p">.</span><span class="n">speed</span> <span class="o">=</span> <span class="n">newValue</span> <span class="o">?</span> <span class="mf">0.2</span> <span class="o">:</span> <span class="mi">1</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UIApplication</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">func</span> <span class="n">setSlowAnimationsEnabled</span><span class="p">(</span><span class="nl">enabled</span><span class="p">:</span> <span class="n">Bool</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="n">windows</span><span class="p">.</span><span class="n">map</span><span class="p">({</span> <span class="n">window</span> <span class="k">in</span> <span class="p">(</span><span class="n">window</span> <span class="kt">as</span><span class="o">?</span> <span class="bp">UIWindow</span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="n">slowAnimationsEnabled</span> <span class="o">=</span> <span class="n">enabled</span> <span class="p">})</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And you can call it in both ways:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">keyWindow</span><span class="o">?</span><span class="p">.</span><span class="n">slowAnimationsEnabled</span> <span class="o">=</span> <span class="nb">true</span>
-</span><span class='line'><span class="bp">UIApplication</span><span class="p">.</span><span class="n">sharedApplication</span><span class="p">().</span><span class="n">setSlowAnimationsEnabled</span><span class="p">(</span><span class="nb">true</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You can go further and expose this to your testers, through iOS Settings Bundle or a fancy shake gesture. Pretty handy!</p>
 ]]></content>
     
   </entry>
