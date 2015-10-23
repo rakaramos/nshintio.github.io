@@ -9,7 +9,7 @@
   <meta name="author" content="NSHint">
 
   
-  <meta name="description" content="You may haven&rsquo;t heard about this law or if you have, you may have wondered who&rsquo;s this Demeter guy. Regardless of it, the Law Of Demeter ( &hellip;">
+  <meta name="description" content="This post is a quick update to Vombat&rsquo;s blog post about using SQL instead of NSDateFormatter when it comes to parsing dates in your project. If &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,141 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+  
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/04/using-sql-as-date-formatter/">Using Sql as Date Formatter</a></h1>
+      
+      
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-04T20:50:51+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This post is a quick update to <a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter">Vombat&rsquo;s blog post</a> about using SQL instead of <code>NSDateFormatter</code> when it comes to parsing dates in your project. If you don&rsquo;t read it yet, I will highly recommend to do it now. This time we will use Swift to make same measurements.</p>
+
+<p>TL;DR:</p>
+
+<p>You can use sql database function <code>strftime</code> to get UNIX time from e.g.: ISO8061 date string.</p>
+
+<p>Here is the magic function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='objc'><span class='line'><span class="p">+</span> <span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nf">parseDatesUsingStringArray:</span><span class="p">(</span><span class="bp">NSArray</span> <span class="o">*</span><span class="p">)</span><span class="nv">stringsArray</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">sqlite3</span> <span class="o">*</span><span class="n">db</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_open</span><span class="p">(</span><span class="s">&quot;:memory:&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_stmt</span> <span class="o">*</span><span class="n">statement</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">sqlite3_prepare_v2</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="s">&quot;SELECT strftime(&#39;%s&#39;, ?);&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">statement</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">datesArray</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="bp">NSInteger</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">stringsArray</span><span class="p">.</span><span class="n">count</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="bp">NSString</span> <span class="o">*</span><span class="n">dateString</span> <span class="o">=</span> <span class="n">stringsArray</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_bind_text</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">dateString</span> <span class="n">UTF8String</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">SQLITE_STATIC</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_step</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">kTimeStamp</span> <span class="n">value</span> <span class="o">=</span> <span class="n">sqlite3_column_int64</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span><span class='line'>        <span class="bp">NSDate</span> <span class="o">*</span><span class="n">date</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSDate</span> <span class="nl">dateWithTimeIntervalSince1970</span><span class="p">:</span><span class="n">value</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="p">[</span><span class="n">datesArray</span> <span class="nl">addObject</span><span class="p">:</span><span class="n">date</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">sqlite3_clear_bindings</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>        <span class="n">sqlite3_reset</span><span class="p">(</span><span class="n">statement</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sqlite3_close</span><span class="p">(</span><span class="n">db</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">return</span> <span class="n">datesArray</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We will use it to replace standard parsing method like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">var</span> <span class="nl">datesFromNSDateFormatter</span><span class="p">:[</span><span class="bp">NSDate</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="n">string</span> <span class="k">in</span> <span class="n">stringsArray</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">datesFromNSDateFormatter</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="bp">NSDateFormatter</span><span class="p">.</span><span class="n">dateFromISOString</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I did some measurements using iPhone 5S with iOS8.2 in release configuration running exactly same amount of data (One Milion strings with ISO8601 date)</p>
+
+<p>And here are the results:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">NSDateFromatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">73.7988719940186</span> <span class="n">s</span>
+</span><span class='line'><span class="n">Time</span> <span class="n">elapsed</span> <span class="k">for</span> <span class="n">SQLDateFormatter</span> <span class="nl">parsing</span><span class="p">:</span> <span class="mf">8.51147103309631</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So using SQL to format string into date is pretty fast but acutally slower than objC version (But still at least 10time faster than regular method) So what about Swift?. Nothing really changed, overall results show faster computation but I&rsquo;m using better CPU so <code>NSDateFormatter</code> is still very very slow&hellip; If you like it, sample source code is available on <a href="https://github.com/noxytrux/DateFormatter">Github</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1170,69 +1305,6 @@ But there is a simple solution to this:</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-  
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/24/detailed-exceptions/">Detailed Exceptions</a></h1>
-      
-      
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-06-24T10:00:00+02:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>There are a lot of tools in Xcode that help us during the debugging process. No doubt. Breakpoints for example are these tiny signals that tell the debugger to temporarily suspend execution of program at a certain point. My favourite type of breakpoints are the exceptional ones. Exceptional breakpoint is this guardian that pauses the execution of our program, as soon as it knows that things are going to be pretty bad.
-When this happens, we are usually presented with all the stack trace and in the blink of an eye we know what happened that was bad. This is the usual scenario.</p>
-
-<p>But sometimes we see things like that:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>*** Assertion failure in -[UITableView _endCellAnimationsWithContext:], /SourceCache/UIKit_Sim/UIKit-3347.44/UITableView.m:1623</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Which with tells us literally nothing, when we are not familiar enough with the code that we are working. We get sterile error message that tells us that we are doing something wrong with UITableView animations, but it&rsquo;s all we get out of the box.</p>
-
-<p>However, there is a way to get more detailed info. The thing that we can do to know the issue of our crash is this:</p>
-
-<p><img class="right" src="/images/detailed-exceptions/1.png"></p>
-
-<ol>
-<li>Go do debug navigator</li>
-<li>Select <code>objc_exception_throw</code> frame</li>
-<li>Go to console</li>
-<li>Type in: <code>po $eax</code> when using simulator or <code>po $r0</code> when debugging on a device.</li>
-</ol>
-
-
-<p><img class="center" src="/images/detailed-exceptions/2.png"></p>
-
-<p>This way you get more detailed error description which tells you a lot more about the place that you should be looking for to find your mistake.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1250,6 +1322,10 @@ When this happens, we are usually presented with all the stack trace and in the 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/10/23/noescape-attribute/">@noescape attribute</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/10/10/working-with-cfunction-pointers-in-swift/">Working with CFunction pointers in Swift</a>
       </li>
     
@@ -1263,10 +1339,6 @@ When this happens, we are usually presented with all the stack trace and in the 
     
       <li class="post">
         <a href="/blog/2015/09/23/uitraitcollection-trick/">UITraitCollection trick</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/09/14/logging-excessive-blocks-on-the-main-thread/">Logging excessive blocks on the main thread</a>
       </li>
     
   </ul>

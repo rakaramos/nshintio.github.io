@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-10-12T09:56:55+02:00</updated>
+  <updated>2015-10-23T18:02:47+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[@noescape attribute]]></title>
+    <link href="http://nshint.io/blog/2015/10/23/noescape-attribute/"/>
+    
+    <updated>2015-10-23T17:00:00+02:00</updated>
+    <id>http://nshint.io/blog/2015/10/23/noescape-attribute</id>
+    
+    <content type="html"><![CDATA[<p>Swift 1.2 introduced us with <code>@noescape</code> attribute. It&rsquo;s a very important feature, when we want to make our code more cleaner and stricter. Using it properly at 3am will prevent many unwanted retain cycles.</p>
+
+<p>While digging into <a href="https://developer.apple.com/library/ios/releasenotes/DeveloperTools/RN-Xcode/Chapters/xc6_release_notes.html">release notes</a> we can see a bunch of clever words:</p>
+
+<blockquote><p>A new <code>@noescape</code> attribute may be used on closure parameters to functions. This indicates that the parameter is only ever called (or passed as an @noescape parameter in a call), which means that it cannot outlive the lifetime of the call. This enables some minor performance optimizations, but more importantly disables the <code>self.</code> requirement in closure arguments.</p></blockquote>
+
+<p>Lets analyze those smart statements and put it into code so everyone can enjoy it:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">func</span> <span class="nf">foo</span><span class="p">(@</span><span class="n">noescape</span> <span class="nl">code</span><span class="p">:(()</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">String</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s">&quot;foo \(bar(code))&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">func</span> <span class="n">bar</span><span class="p">(@</span><span class="n">noescape</span> <span class="nl">code</span><span class="p">:(()</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="p">))</span> <span class="o">-&gt;</span> <span class="n">String</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">code</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">print</span><span class="p">(</span><span class="n">foo</span><span class="p">()</span> <span class="p">{</span><span class="s">&quot;bar&quot;</span><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It can be also captured in another <code>@noescape</code> closure:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">func</span> <span class="nf">baz</span><span class="p">(@</span><span class="n">noescape</span> <span class="nl">code</span><span class="p">:(()</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="p">))</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">qux</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">code</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="k">func</span> <span class="nf">qux</span><span class="p">(@</span><span class="n">noescape</span> <span class="nl">code</span><span class="p">:(()</span> <span class="o">-&gt;</span> <span class="n">String</span><span class="p">))</span> <span class="p">{}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s important to point out, that closures (and functions) annotated with <code>@noescape</code> can only be passed as <code>@noescape</code> parameters. What this mean is:</p>
+
+<ul>
+<li>we cannot run it asynchronously:
+<img class="center" src="http://nshint.io/images/noescape-attribute/noescape-async.png"></li>
+<li>we can&rsquo;t store it
+<img class="center" src="http://nshint.io/images/noescape-attribute/noescape-store.png"></li>
+<li>we can&rsquo;t capture it in another non-<code>@noescape</code> closure
+<img class="center" src="http://nshint.io/images/noescape-attribute/noescape-capture.png"></li>
+</ul>
+
+
+<p>Last to mention, in the future releases this will be taken even further:</p>
+
+<blockquote><p>This enables control-flow-like functions to be more transparent about their behavior. In a future beta, the standard library will adopt this attribute in functions like autoreleasepool().</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">func</span> <span class="nf">autoreleasepool</span><span class="p">(@</span><span class="n">noescape</span> <span class="nl">code</span><span class="p">:</span> <span class="p">()</span> <span class="o">-&gt;</span> <span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">pushAutoreleasePool</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">code</span><span class="p">()</span>
+</span><span class='line'>    <span class="n">popAutoreleasePool</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So dear developer the best is yet to come! ;]</p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
@@ -2194,44 +2288,6 @@ But there is a simple solution to this:</p>
 <p><img class="center" src="http://nshint.io/images/storyboard-localization/2.png"></p>
 
 <p>Way better, don&rsquo;t you think? Now you have a shortcut for setting localized strings.</p>
-]]></content>
-    
-  </entry>
-  
-  <entry>
-    
-    <title type="html"><![CDATA[Detailed Exceptions]]></title>
-    <link href="http://nshint.io/blog/2015/06/24/detailed-exceptions/"/>
-    
-    <updated>2015-06-24T10:00:00+02:00</updated>
-    <id>http://nshint.io/blog/2015/06/24/detailed-exceptions</id>
-    
-    <content type="html"><![CDATA[<p>There are a lot of tools in Xcode that help us during the debugging process. No doubt. Breakpoints for example are these tiny signals that tell the debugger to temporarily suspend execution of program at a certain point. My favourite type of breakpoints are the exceptional ones. Exceptional breakpoint is this guardian that pauses the execution of our program, as soon as it knows that things are going to be pretty bad.
-When this happens, we are usually presented with all the stack trace and in the blink of an eye we know what happened that was bad. This is the usual scenario.</p>
-
-<p>But sometimes we see things like that:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>*** Assertion failure in -[UITableView _endCellAnimationsWithContext:], /SourceCache/UIKit_Sim/UIKit-3347.44/UITableView.m:1623</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Which with tells us literally nothing, when we are not familiar enough with the code that we are working. We get sterile error message that tells us that we are doing something wrong with UITableView animations, but it&rsquo;s all we get out of the box.</p>
-
-<p>However, there is a way to get more detailed info. The thing that we can do to know the issue of our crash is this:</p>
-
-<p><img class="right" src="http://nshint.io/images/detailed-exceptions/1.png"></p>
-
-<ol>
-<li>Go do debug navigator</li>
-<li>Select <code>objc_exception_throw</code> frame</li>
-<li>Go to console</li>
-<li>Type in: <code>po $eax</code> when using simulator or <code>po $r0</code> when debugging on a device.</li>
-</ol>
-
-
-<p><img class="center" src="http://nshint.io/images/detailed-exceptions/2.png"></p>
-
-<p>This way you get more detailed error description which tells you a lot more about the place that you should be looking for to find your mistake.</p>
 ]]></content>
     
   </entry>
