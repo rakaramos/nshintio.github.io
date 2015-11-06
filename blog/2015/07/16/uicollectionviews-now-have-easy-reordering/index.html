@@ -49,8 +49,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -94,6 +99,9 @@
 
 
 <div class="entry-content"><p>I&rsquo;m a huge fan of <code>UICollectionView</code>. It&rsquo;s way more customizable than his older brother <code>UITableView</code>. Nowadays I use collection view even more often than table view. With iOS 9 it supports easy reordering. Before it wasn&rsquo;t possible out of the box, and to do so means painful work. Let&rsquo;s have look at the API. You can find the accompanying Xcode project <a href="https://github.com/nshintio/uicollectionview-reordering">on GitHub</a>.</p>
+
+<!--more-->
+
 
 <p>The easiest way to add easy reordering is to use <code>UICollectionViewController</code>. It now has a new property called <code>installsStandardGestureForInteractiveMovement</code> which adds standard gestures to reorder cells. This property is <code>true</code> by default, which means that there&rsquo;s only one method we should to override to get things working.</p>
 
@@ -247,7 +255,6 @@
 
 <p>P.S: I would like to thanks <a href="https://twitter.com/qdoug">Douglas Hill</a> for hinting out some improvements in our code. Thanks Douglas, keep up the good work!</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/wojteklukaszuk" >Wojciech Łukaszuk</a>, 2015 Jul 16</em>

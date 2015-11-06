@@ -49,8 +49,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -96,6 +101,9 @@
 <div class="entry-content"><p>iOS Simulator has a feature that slows animations, you can toggle it either by pressing <code>⌘T</code> or choosing <code>Debug &gt; Toggle Slow Animations in Frontmost App</code>. It&rsquo;s very useful, but what if we want to do the same on device? It&rsquo;s easy, fast and simple.</p>
 
 <p><code>CALayer</code> has a property called <code>speed</code>, which is a time multiplier. This means that if we have an animation with a duration of 1 second, and set the layer&rsquo;s speed to 2, it&rsquo;ll take just 0.5 seconds to finish. The best thing about it is that it&rsquo;s related to the parent layer. So when we change the speed of a particular <code>CALayer</code>, every child layer will be affected. So, if we change <code>UIWindow</code> layer speed, every <code>CALayer</code> in our application will perform animations with that custom speed value. That leaves us with this two extensions:</p>
+
+<!--more-->
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -147,7 +155,6 @@
 
 <p>You can go further and expose this to your testers, through iOS Settings Bundle or a fancy shake gesture. Pretty handy!</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Jun 23</em>

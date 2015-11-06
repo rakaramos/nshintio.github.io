@@ -50,8 +50,13 @@ The worst users &hellip;">
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -99,6 +104,9 @@ The worst users &hellip;">
 <p>Having an application running at 60 FPS is every programmers dream, and users delight.
 The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s a dreadful crime in mobile world nowadays. Users try to interact at any moment and according to Murphy’s law they will find all your mistakes. So, you better keep the main thread slim.</p>
 
+<!--more-->
+
+
 <p>To keep things smoothly in the users interface, every single operation that&rsquo;s schedule to run into the main thread can take longer than 16 milliseconds, and there&rsquo;s a handy solution to get you covered. It&rsquo;s a little library called <a href="https://github.com/wojteklukaszuk/Watchdog">Watchdog</a>.</p>
 
 <p>Watchdog is a very simple and straightforward library that logs excessive blocking on the main thread. Let&rsquo;s take a look at how to use it:</p>
@@ -117,7 +125,6 @@ The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s 
 
 <p>Pretty nice debugging tool!</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Sep 14</em>

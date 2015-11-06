@@ -49,8 +49,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -98,6 +103,9 @@
 <p>While digging into <a href="https://developer.apple.com/library/ios/releasenotes/DeveloperTools/RN-Xcode/Chapters/xc6_release_notes.html">release notes</a> we can see a bunch of clever words:</p>
 
 <blockquote><p>A new <code>@noescape</code> attribute may be used on closure parameters to functions. This indicates that the parameter is only ever called (or passed as an @noescape parameter in a call), which means that it cannot outlive the lifetime of the call. This enables some minor performance optimizations, but more importantly disables the <code>self.</code> requirement in closure arguments.</p></blockquote>
+
+<!--more-->
+
 
 <p>Lets analyze those smart statements and put it into code so everyone can enjoy it:</p>
 
@@ -176,7 +184,6 @@
 
 <p>So dear developer the best is yet to come! ;]</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/mmatoszko" >Mateusz Matoszko</a>, 2015 Oct 23</em>

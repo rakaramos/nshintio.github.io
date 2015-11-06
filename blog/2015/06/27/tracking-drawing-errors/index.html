@@ -56,8 +56,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -118,6 +123,9 @@
 </span><span class='line'>&lt;Error&gt;: CGContextRestoreGState: invalid context 0x0</span></code></pre></td></tr></table></div></figure>
 
 
+<!--more-->
+
+
 <p>And as always is very hard to track, because you cannot exactly say which draw command actually cause this or where does it comes from.
 But there is a simple solution to this:</p>
 
@@ -127,7 +135,6 @@ But there is a simple solution to this:</p>
 
 <p>Now you can see all callstack and all values to find root cause of incorrect drawing.</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/noxytrux" >Marcin Małysz</a>, 2015 Jun 27</em>

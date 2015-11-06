@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-10-23T18:02:47+02:00</updated>
+  <updated>2015-11-06T21:13:59+01:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -26,6 +26,9 @@
 <p>While digging into <a href="https://developer.apple.com/library/ios/releasenotes/DeveloperTools/RN-Xcode/Chapters/xc6_release_notes.html">release notes</a> we can see a bunch of clever words:</p>
 
 <blockquote><p>A new <code>@noescape</code> attribute may be used on closure parameters to functions. This indicates that the parameter is only ever called (or passed as an @noescape parameter in a call), which means that it cannot outlive the lifetime of the call. This enables some minor performance optimizations, but more importantly disables the <code>self.</code> requirement in closure arguments.</p></blockquote>
+
+<!--more-->
+
 
 <p>Lets analyze those smart statements and put it into code so everyone can enjoy it:</p>
 
@@ -116,6 +119,9 @@
     <id>http://nshint.io/blog/2015/10/10/working-with-cfunction-pointers-in-swift</id>
     
     <content type="html"><![CDATA[<p>Swift like objC allow us to mix it with other languages, unfotunately when it comes to Swift we can only choose between our good old friend objC or ANIS C, as there is still lack of C++ support. Basically using function pointers allows us to call C functions inside Swift. Swift will automatically convert methods included in Bridge Header into Swift equivalents:</p>
+
+<!--more-->
+
 
 <p>This code:</p>
 
@@ -308,6 +314,9 @@
     <content type="html"><![CDATA[<p>Today Bluetooth Low Energy can be found in many cool applications, it can be used from simple data exchange to payment terminals and the more popular usage with iBeacons. But what if we want to build something funny with it? Like some simple game not even realtime, it may be even turn based game. Imagine you do not need to go through this long setup, waiting for server players to be ready etc.</p>
 
 <p>Everyone knows that building good multiplayer game is hard, multiplayer itself is hard&hellip; But here I want to show you my small proof of concept of working bluetooth low enery multiplayer game.</p>
+
+<!--more-->
+
 
 <p>It can be used in any kind of game! Strategy, board, rpg, race. I built§ a small demo project to show this in details but now let&rsquo;s focus on basics:</p>
 
@@ -852,6 +861,9 @@
     
     <content type="html"><![CDATA[<p>Swift is out there for about a year and it&rsquo;s a great programming language. I think that almost every iOS/OSX developer out there has already written couple of things in Swift (if you haven&rsquo;t, go ahead and try, you won&rsquo;t regret it, I promise). Although, we have many years of libs and frameworks built using Objective-C and sooner or later a project may have both Swift and Objective-C working together.</p>
 
+<!--more-->
+
+
 <p>Fortunately, Apple gave us a <a href="https://itunes.apple.com/us/book/using-swift-cocoa-objective/id888894773?mt=11">book</a> and a couple of WWDC session (<a href="https://developer.apple.com/videos/play/wwdc2014-406/">here</a> and <a href="https://developer.apple.com/videos/play/wwdc2015-401/">here</a>) with the intent to help developers on this task.</p>
 
 <p>For those who have some experience with this integration knows that casting plays an important role. So, todays hint will dig into an poor documented protocol called <code>_ObjectiveCBridgeable</code>.</p>
@@ -992,6 +1004,9 @@
     
     <content type="html"><![CDATA[<p>Gone are the days where there was just one iPhone for developers as a target. Now we have to support multiple devices with different screen sizes. Fortunately, we have autolayout, which solves a part of this design equation, the other part is solved with <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UITraitCollection_ClassReference/"><code>UITraitCollection</code></a>. Trait collection object has two size classes: horizontal and vertical. Each of these classes has three possible values: compact, regular or any. The current device+orientation can be described as a combination of the sizes.</p>
 
+<!--more-->
+
+
 <p><img class="center" src="http://nshint.io/images/uitraitcollection_trick/1.png"></p>
 
 <p>The best thing is that storyboards and nib files support these size classes. We can make layout changes directly onto them. Every view or auto-layout constraint can exist in one or several other size classes. So it is possible to support multiple devices and orientations without any code. Nevertheless there is a case, which is not covered at all. Imagine that you support only portrait mode and the designer wishes to make a difference between iPhone 5 and iPhone 6+ screen. In this case, size classes are not much helpful. However, we can leverage them in an unusual way.</p>
@@ -1058,6 +1073,9 @@
 <p>Having an application running at 60 FPS is every programmers dream, and users delight.
 The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s a dreadful crime in mobile world nowadays. Users try to interact at any moment and according to Murphy’s law they will find all your mistakes. So, you better keep the main thread slim.</p>
 
+<!--more-->
+
+
 <p>To keep things smoothly in the users interface, every single operation that&rsquo;s schedule to run into the main thread can take longer than 16 milliseconds, and there&rsquo;s a handy solution to get you covered. It&rsquo;s a little library called <a href="https://github.com/wojteklukaszuk/Watchdog">Watchdog</a>.</p>
 
 <p>Watchdog is a very simple and straightforward library that logs excessive blocking on the main thread. Let&rsquo;s take a look at how to use it:</p>
@@ -1090,6 +1108,9 @@ The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s 
     <content type="html"><![CDATA[<p>A localized application is the one that has all of its texts, translated into the users device current language. And this, for us developers, means one thing, and one thing only. Nightmare.</p>
 
 <p>Every time a new translation comes, it&rsquo;s necessary to run the application and check for broken layouts. Take this quite simple UI.</p>
+
+<!--more-->
+
 
 <p><img class="center" src="http://nshint.io/images/autolayout-and-nslocalizedstrings/01.png" width="375"></p>
 
@@ -1127,6 +1148,9 @@ The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s 
 <p>Motion effects is an easy way to react to external variations on the device&rsquo;s orientation. To say, <code>UIKit</code> performs UI changes whenever the user tilts the device, vertically or horizontally.</p>
 
 <p>Let&rsquo;s use <code>UIInterpolatingMotionEffect</code> a subclass of <code>UIMotionEffects</code>, with <code>MapKit</code>. Notice how appealing it is.</p>
+
+<!--more-->
+
 
 <p><img class="center" src="http://nshint.io/images/dont-forget-about-motion-effects/01.gif"></p>
 
@@ -1169,6 +1193,9 @@ The worst users experience ever is a frozen and unresponsive screen. It&rsquo;s 
     <id>http://nshint.io/blog/2015/08/17/autolayout-breakpoints</id>
     
     <content type="html"><![CDATA[<p>Auto layout has become a crucial tool for iOS and OS X development. It makes creating layout for multiple screen sizes easy peasy. But sometimes it can drive you crazy, with verbose and misleading logs.</p>
+
+<!--more-->
+
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1256,6 +1283,9 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
 
 <p>Besides of helpfull UserInfo object keys which give us comprehensive text information about progress of our tasks in proper language, NSProgress was supposed to provide us way of compositioning objects into trees. However, first version of class allowed this in an implicit way which does not look very clear first time you learn it.</p>
 
+<!--more-->
+
+
 <p>I will try to present it to you in a short way:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -1311,6 +1341,9 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
     <id>http://nshint.io/blog/2015/08/04/using-sql-as-date-formatter</id>
     
     <content type="html"><![CDATA[<p>This post is a quick update to <a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter">Vombat&rsquo;s blog post</a> about using SQL instead of <code>NSDateFormatter</code> when it comes to parsing dates in your project. If you don&rsquo;t read it yet, I will highly recommend to do it now. This time we will use Swift to make same measurements.</p>
+
+<!--more-->
+
 
 <p>TL;DR:</p>
 
@@ -1422,6 +1455,9 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
     
     <content type="html"><![CDATA[<p>You may haven&rsquo;t heard about this law or if you have, you may have wondered <a href="http://homepages.cwi.nl/~storm/teaching/reader/LieberherrHolland89.pdf">who&rsquo;s this Demeter guy</a>. Regardless of it, the Law Of Demeter (LoD) is a foundation concept that&rsquo;s used among several design patterns, to wit: Delegate, Proxy, Façade, Adapter and Decorator. Therefore, you probably are already taking advantage of this Law, knowing it or not.</p>
 
+<!--more-->
+
+
 <p>There&rsquo;s a particular situation that occurs with iOS, that&rsquo;s perfect for applying the LoD. Sometimes it&rsquo;s needed to call method in our <code>UIApplicationDelegate</code>. The common way of doing that is the following:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -1522,6 +1558,9 @@ If you finally <a href="http://oleb.net/blog/2014/03/nsprogress/">find a proper 
     <content type="html"><![CDATA[<p>Bash scripts are commonly used in Mac/iOS development to make repetitive operations hands-free. However sometimes things go wrong and in a perfect world I’d like to be properly informed about the errors.
 Here comes view called „Report Navigator”, which displays any type of errors, warnings at compile time of Objective-C/Swift, or even while typing new lines of code. Let me show how to use the Report Navigator.</p>
 
+<!--more-->
+
+
 <p>As usual create new <code>Run Script Phase</code> and insert your Bash script:</p>
 
 <p><img class="center" src="http://nshint.io/images/bash-scripts-marks/bash-scripts-new-script-phase.png"></p>
@@ -1567,6 +1606,9 @@ Here comes view called „Report Navigator”, which displays any type of errors
     <id>http://nshint.io/blog/2015/07/16/uicollectionviews-now-have-easy-reordering</id>
     
     <content type="html"><![CDATA[<p>I&rsquo;m a huge fan of <code>UICollectionView</code>. It&rsquo;s way more customizable than his older brother <code>UITableView</code>. Nowadays I use collection view even more often than table view. With iOS 9 it supports easy reordering. Before it wasn&rsquo;t possible out of the box, and to do so means painful work. Let&rsquo;s have look at the API. You can find the accompanying Xcode project <a href="https://github.com/nshintio/uicollectionview-reordering">on GitHub</a>.</p>
+
+<!--more-->
+
 
 <p>The easiest way to add easy reordering is to use <code>UICollectionViewController</code>. It now has a new property called <code>installsStandardGestureForInteractiveMovement</code> which adds standard gestures to reorder cells. This property is <code>true</code> by default, which means that there&rsquo;s only one method we should to override to get things working.</p>
 
@@ -1735,6 +1777,9 @@ Here comes view called „Report Navigator”, which displays any type of errors
 
 <p>iOS has some gotchas regarding multithread, things that if you don&rsquo;t respect, may cause your application to crash or hang the users interface, for example:</p>
 
+<!--more-->
+
+
 <ul>
 <li>Animations outside the main thread, may crash the application.<br/></li>
 <li>Performing network requests on the main thread, will hang the users interface.<br/></li>
@@ -1776,6 +1821,9 @@ We can solve those situations by using the so called <code>Symbolic Breakpoints<
     <content type="html"><![CDATA[<p>Have you ever encountered a situation where you want to build some record or music app ? But you need to somehow react on a phone call which in many cases break recording or playing in more advanced app (mostly when it comes to <code>CoreAudio</code>) or switch UI in case of call? <code>CoreTelephony</code> is a great library which will help in most of the situations.</p>
 
 <p>To detect phone call on your iPhone or iPad app (this may be the case now when we use continuity) simply use this piece of code:</p>
+
+<!--more-->
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1983,6 +2031,9 @@ We can solve those situations by using the so called <code>Symbolic Breakpoints<
 </span></code></pre></td></tr></table></div></figure>
 
 
+<!--more-->
+
+
 <p>But there is a simple solution. Instead of animating property we will perform transition on object itself.</p>
 
 <p>Using <code>transitionWithView</code> should solve our problem:</p>
@@ -2029,6 +2080,9 @@ We can solve those situations by using the so called <code>Symbolic Breakpoints<
 
 <p>This error may happen when you try to load <code>UIImage</code> and your asset string is <code>nil</code>. For now this will not crash your app but may case some future problems. This may also lead to some UI inconsistency. To track down issue like this we need to set symbolic breakpoint:</p>
 
+<!--more-->
+
+
 <p><img class="center" src="http://nshint.io/images/uicatalog_invalid_asset/null_asset.png"></p>
 
 <p>Add <code>$arg3 == nil</code> condition (on Simulator) or <code>$r0 == nil</code> condition on iPhone device. This will stop executing your app exactly in the line where you try to load broken image.</p>
@@ -2062,6 +2116,9 @@ We can solve those situations by using the so called <code>Symbolic Breakpoints<
 </span><span class='line'>&lt;Error&gt;: CGContextRestoreGState: invalid context 0x0</span></code></pre></td></tr></table></div></figure>
 
 
+<!--more-->
+
+
 <p>And as always is very hard to track, because you cannot exactly say which draw command actually cause this or where does it comes from.
 But there is a simple solution to this:</p>
 
@@ -2085,6 +2142,9 @@ But there is a simple solution to this:</p>
     <content type="html"><![CDATA[<p>Internationalizing the users interface in Xcode is <a href="https://developer.apple.com/library/ios/documentation/MacOSX/Conceptual/BPInternational/InternationalizingYourUserInterface/InternationalizingYourUserInterface.html">really easy</a>. Xcode separates all the texts from your views in a dictionary. However, we can make it better, using <code>extensions</code> and <code>@IBDesignables</code>. How handy would it be, if setting localized strings were as easy as the following?<br/><br/>
 <img class="center" src="http://nshint.io/images/storyboard-localization/1.png">
 <br/></p>
+
+<!--more-->
+
 
 <p>Easier than that, are the <code>extensions</code> to unleash this fancy feature.</p>
 

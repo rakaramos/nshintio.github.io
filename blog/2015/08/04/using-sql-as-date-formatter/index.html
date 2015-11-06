@@ -49,8 +49,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -94,6 +99,9 @@
 
 
 <div class="entry-content"><p>This post is a quick update to <a href="http://vombat.tumblr.com/post/60530544401/date-parsing-performance-on-ios-nsdateformatter">Vombat&rsquo;s blog post</a> about using SQL instead of <code>NSDateFormatter</code> when it comes to parsing dates in your project. If you don&rsquo;t read it yet, I will highly recommend to do it now. This time we will use Swift to make same measurements.</p>
+
+<!--more-->
+
 
 <p>TL;DR:</p>
 
@@ -192,7 +200,6 @@
 
 <p>So using SQL to format string into date is pretty fast but acutally slower than objC version (But still at least 10time faster than regular method) So what about Swift?. Nothing really changed, overall results show faster computation but I&rsquo;m using better CPU so <code>NSDateFormatter</code> is still very very slow&hellip; If you like it, sample source code is available on <a href="https://github.com/noxytrux/DateFormatter">Github</a></p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/noxytrux" >Marcin Małysz</a>, 2015 Aug 4</em>

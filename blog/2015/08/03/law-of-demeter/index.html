@@ -49,8 +49,13 @@
 
 <body   class="collapse-sidebar sidebar-footer" >
   <header role="banner">
-	<!-- <div class="header-title"><a href="/">NSHint</a></div> -->
-	<a href="/"><img src="/images/nshint_logo.png" height="120px" /></a>
+	<a href="/"><img src="/images/nshint_logo.png" /></a>
+	<br/>
+	<div class="social">
+		<a href="https://twitter.com/nshintio"><img src="/images/twitter.png" /></a>
+		<a href="https://github.com/nshintio/"><img src="/images/github.png" /></a>
+		<a href="http://nshint.io/atom.xml"><img src="/images/rss.png" /></a>
+	</div>
 
 </header>
   <nav role="navigation"><ul class="main-navigation">
@@ -94,6 +99,9 @@
 
 
 <div class="entry-content"><p>You may haven&rsquo;t heard about this law or if you have, you may have wondered <a href="http://homepages.cwi.nl/~storm/teaching/reader/LieberherrHolland89.pdf">who&rsquo;s this Demeter guy</a>. Regardless of it, the Law Of Demeter (LoD) is a foundation concept that&rsquo;s used among several design patterns, to wit: Delegate, Proxy, Façade, Adapter and Decorator. Therefore, you probably are already taking advantage of this Law, knowing it or not.</p>
+
+<!--more-->
+
 
 <p>There&rsquo;s a particular situation that occurs with iOS, that&rsquo;s perfect for applying the LoD. Sometimes it&rsquo;s needed to call method in our <code>UIApplicationDelegate</code>. The common way of doing that is the following:</p>
 
@@ -181,7 +189,6 @@
 
 <p>Now go ahead and follow the rule!</p>
 </div>
-
 
   <footer>
     <em>by <a href="https://www.twitter.com/rakaramos" >Rafael Machado</a>, 2015 Aug 3</em>
