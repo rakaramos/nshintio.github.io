@@ -4,7 +4,7 @@
   <title><![CDATA[NSHint]]></title>
   <link href="http://nshint.io/atom.xml" rel="self"/>
   <link href="http://nshint.io/"/>
-  <updated>2015-11-15T18:04:47+01:00</updated>
+  <updated>2016-05-02T01:30:48+02:00</updated>
   <id>http://nshint.io/</id>
   <author>
     <name><![CDATA[NSHint]]></name>
@@ -12,6 +12,162 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[Wrapping API's using the Builder Pattern]]></title>
+    <link href="http://nshint.io/blog/2016/05/02/wrapping-apis-using-the-builder-pattern/"/>
+    
+    <updated>2016-05-02T22:36:49+02:00</updated>
+    <id>http://nshint.io/blog/2016/05/02/wrapping-apis-using-the-builder-pattern</id>
+    
+    <content type="html"><![CDATA[<p>The way I was introduced to the <a href="http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612">Design Patterns</a> lead me to think that those clever and neat solutions were meant to be used just in big softwares solutions. I never considered using them into the small pieces of software. What do I mean by that? Please, read on.</p>
+
+<p>The Builder Pattern if defined as follows:</p>
+
+<blockquote><p>Separate the construction of a complex object from its representation so that the same construction process can create different representations.</p></blockquote>
+
+<!--more-->
+
+
+<p>Now, consider for a while the creation of an <code>UIAlertView</code> in iOS.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">let</span> <span class="n">alert</span> <span class="o">=</span> <span class="bp">UIAlertView</span><span class="p">(</span><span class="nl">title</span><span class="p">:</span> <span class="s">&quot;Question&quot;</span><span class="p">,</span> <span class="nl">message</span><span class="p">:</span> <span class="s">&quot;Do you like apples?&quot;</span><span class="p">,</span> <span class="nl">delegate</span><span class="p">:</span> <span class="nb">self</span><span class="p">,</span> <span class="nl">cancelButtonTitle</span><span class="p">:</span> <span class="s">&quot;I hate it!&quot;</span><span class="p">,</span> <span class="nl">otherButtonTitles</span><span class="p">:</span> <span class="s">&quot;Yes, I do!&quot;</span><span class="p">,</span> <span class="s">&quot;More of less&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is a long method call, right? But really, that&rsquo;s not the problem. The problem here is that our class has to conform to <code>UIAlertViewDelegate</code> in order to receive the alert result. Wouldn&rsquo;t be nicer to have that logic encapsulated? Well, go back and read the definition for the builder pattern, it fits like a glove, am I right?</p>
+
+<p>An idea on how to wrap the builder pattern around the <code>UIAlertView</code> class is as above:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">class</span> <span class="nl">AlertBuilder</span><span class="p">:</span> <span class="bp">NSObject</span><span class="p">,</span> <span class="bp">UIAlertViewDelegate</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">typealias</span> <span class="n">AlertBuilderCompletion</span> <span class="o">=</span> <span class="n">Int</span> <span class="o">-&gt;</span> <span class="n">Void</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">private</span> <span class="k">var</span> <span class="nl">alertTitle</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="n">private</span> <span class="k">var</span> <span class="nl">alertMessage</span><span class="p">:</span> <span class="n">String</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+</span><span class='line'>    <span class="n">private</span> <span class="k">var</span> <span class="nl">alertStyle</span><span class="p">:</span> <span class="n">UIAlertViewStyle</span> <span class="o">=</span> <span class="p">.</span><span class="n">Default</span>
+</span><span class='line'>    <span class="n">private</span> <span class="k">var</span> <span class="nl">alertButtonTitles</span><span class="p">:</span> <span class="p">[</span><span class="n">String</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span class='line'>    <span class="n">private</span> <span class="k">var</span> <span class="nl">alertCompletion</span><span class="p">:</span> <span class="n">AlertBuilderCompletion</span><span class="o">?</span> <span class="o">=</span> <span class="nb">nil</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">title</span><span class="p">(</span><span class="nl">title</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlertBuilder</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">alertTitle</span> <span class="o">=</span> <span class="n">title</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">message</span><span class="p">(</span><span class="nl">message</span><span class="p">:</span> <span class="n">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlertBuilder</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">alertMessage</span> <span class="o">=</span> <span class="n">message</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">style</span><span class="p">(</span><span class="nl">style</span><span class="p">:</span> <span class="n">UIAlertViewStyle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AlertBuilder</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">alertStyle</span> <span class="o">=</span> <span class="n">style</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">buttonTitles</span><span class="p">(</span><span class="nl">titles</span><span class="p">:</span> <span class="n">String</span><span class="p">...)</span> <span class="o">-&gt;</span> <span class="n">AlertBuilder</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">alertButtonTitles</span> <span class="o">=</span> <span class="n">alertButtonTitles</span> <span class="o">+</span> <span class="n">titles</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">show</span><span class="p">(</span><span class="nl">completion</span><span class="p">:</span> <span class="n">AlertBuilderCompletion</span><span class="o">?</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">alertView</span> <span class="o">=</span> <span class="bp">UIAlertView</span><span class="p">()</span>
+</span><span class='line'>        <span class="n">alertView</span><span class="p">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="nb">self</span>
+</span><span class='line'>        <span class="n">alertView</span><span class="p">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">alertTitle</span>
+</span><span class='line'>        <span class="n">alertView</span><span class="p">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">alertMessage</span>
+</span><span class='line'>        <span class="n">alertView</span><span class="p">.</span><span class="n">alertViewStyle</span> <span class="o">=</span> <span class="n">alertStyle</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">alertButtonTitles</span><span class="p">.</span><span class="n">forEach</span> <span class="p">{</span> <span class="n">title</span> <span class="k">in</span>
+</span><span class='line'>            <span class="n">alertView</span><span class="p">.</span><span class="n">addButtonWithTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">alertCompletion</span> <span class="o">=</span> <span class="n">completion</span>
+</span><span class='line'>        <span class="n">alertView</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">func</span> <span class="n">alertView</span><span class="p">(</span><span class="nl">alertView</span><span class="p">:</span> <span class="bp">UIAlertView</span><span class="p">,</span> <span class="n">didDismissWithButtonIndex</span> <span class="nl">buttonIndex</span><span class="p">:</span> <span class="n">Int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">alertCompletion</span><span class="o">?</span><span class="p">(</span><span class="n">buttonIndex</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, all that is necessary to use create an alert is:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="n">alert</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="s">&quot;Question&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">.</span><span class="n">message</span><span class="p">(</span><span class="s">&quot;Do you like apples?&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">.</span><span class="n">buttonTitles</span><span class="p">(</span><span class="s">&quot;Yes, I do!&quot;</span><span class="p">,</span><span class="s">&quot;More of less&quot;</span><span class="p">,</span> <span class="s">&quot;I hate it!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">.</span><span class="n">show</span> <span class="p">{</span> <span class="n">index</span> <span class="k">in</span>
+</span><span class='line'>    <span class="n">print</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the past, I would have used the first approach and lived with that. Of course, showing alerts to the user is a very tiny part of a real work application. But that&rsquo;s preciselly where I was wrong. This kind of applicability of the builder (among all other design patterns) is what makes software components reusable.
+And there are some other places where you could apply the same principle, for example <code>NSAttributedString</code> or <code>UIActionSheet</code>.</p>
+
+<p>I hope you find that useful. Builder to the rescue!</p>
+
+<p>P.S: Yes, yes I know that Apple has released <code>UIAlertController</code> and deprecated both <code>UIAlertView</code> and <code>UIActionSheet</code>. However, the idea is pretty much the same, alothough what Apple did is Factory instead of a Builder.</p>
+]]></content>
+    
+  </entry>
   
   <entry>
     
@@ -2127,227 +2283,6 @@ But there is a simple solution to this:</p>
 <p><img class="center" src="http://nshint.io/images/track-drawin-errors/screen_cgposterror.png"></p>
 
 <p>Now you can see all callstack and all values to find root cause of incorrect drawing.</p>
-]]></content>
-    
-  </entry>
-  
-  <entry>
-    
-    <title type="html"><![CDATA[Storyboard Localization]]></title>
-    <link href="http://nshint.io/blog/2015/06/25/storyboard-localization/"/>
-    
-    <updated>2015-06-25T08:00:00+02:00</updated>
-    <id>http://nshint.io/blog/2015/06/25/storyboard-localization</id>
-    
-    <content type="html"><![CDATA[<p>Internationalizing the users interface in Xcode is <a href="https://developer.apple.com/library/ios/documentation/MacOSX/Conceptual/BPInternational/InternationalizingYourUserInterface/InternationalizingYourUserInterface.html">really easy</a>. Xcode separates all the texts from your views in a dictionary. However, we can make it better, using <code>extensions</code> and <code>@IBDesignables</code>. How handy would it be, if setting localized strings were as easy as the following?<br/><br/>
-<img class="center" src="http://nshint.io/images/storyboard-localization/1.png">
-<br/></p>
-
-<!--more-->
-
-
-<p>Easier than that, are the <code>extensions</code> to unleash this fancy feature.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-</pre></td><td class='code'><pre><code class='swift'><span class='line'><span class="k">extension</span> <span class="bp">UITextField</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedPlaceholder</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">placeholder</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedText</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UITextView</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedText</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UIBarItem</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedTitle</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UILabel</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedText</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UINavigationItem</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedTitle</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UIButton</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedTitle</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">setTitle</span><span class="p">(</span><span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">),</span> <span class="nl">forState</span><span class="p">:</span> <span class="n">UIControlState</span><span class="p">.</span><span class="n">Normal</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UISearchBar</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedPrompt</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localizedPlaceholder</span><span class="p">:</span> <span class="n">String</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="s">&quot;&quot;</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nb">self</span><span class="p">.</span><span class="n">placeholder</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">newValue</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">extension</span> <span class="bp">UISegmentedControl</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="p">@</span><span class="n">IBInspectable</span> <span class="k">var</span> <span class="nl">localized</span><span class="p">:</span> <span class="n">Bool</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kr">get</span> <span class="p">{</span> <span class="k">return</span> <span class="nb">true</span> <span class="p">}</span>
-</span><span class='line'>        <span class="kr">set</span> <span class="p">{</span>
-</span><span class='line'>            <span class="k">for</span> <span class="n">index</span> <span class="k">in</span> <span class="mf">0.</span><span class="p">.</span><span class="o">&lt;</span><span class="n">numberOfSegments</span> <span class="p">{</span>
-</span><span class='line'>                <span class="k">var</span> <span class="n">title</span> <span class="o">=</span> <span class="n">NSLocalizedString</span><span class="p">(</span><span class="n">titleForSegmentAtIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">!</span><span class="p">,</span> <span class="nl">comment</span><span class="p">:</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
-</span><span class='line'>                <span class="n">setTitle</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="nl">forSegmentAtIndex</span><span class="p">:</span> <span class="n">index</span><span class="p">)</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>UISegmentedControl</code> may have multiple segments. In this case, set the <code>localized</code> to <code>true</code> and put the localized key into the storyboard. The extension will lookup into it and return the right value for every segment.</p>
-
-<p><img class="center" src="http://nshint.io/images/storyboard-localization/2.png"></p>
-
-<p>Way better, don&rsquo;t you think? Now you have a shortcut for setting localized strings.</p>
 ]]></content>
     
   </entry>
